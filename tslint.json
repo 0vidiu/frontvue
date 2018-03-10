@@ -1,0 +1,62 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-eslint-rules"
+  ],
+  "rules": {
+    "class-name": true,
+    "interface-name": false,
+    "curly": true,
+    "eofline": true,
+    "forin": true,
+    "indent": [true, "spaces"],
+    "label-position": true,
+    "max-line-length": [true, 120],
+    "no-arg": true,
+    "no-bitwise": true,
+    "no-console": [true,
+      "debug",
+      "info",
+      "time",
+      "timeEnd",
+      "trace"
+    ],
+    "no-construct": true,
+    "no-debugger": true,
+    "no-duplicate-variable": true,
+    "no-consecutive-blank-lines": [true, 2],
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "no-empty": true,
+    "no-eval": true,
+    "no-string-literal": false,
+    "no-switch-case-fall-through": true,
+    "no-trailing-whitespace": true,
+    "no-unused-expression": false,
+    "only-arrow-functions": false,
+    "space-before-function-paren": [true,
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    "one-line": [true,
+      "check-open-brace",
+      "check-catch",
+      "check-else",
+      "check-whitespace"
+    ],
+    "quotemark": [true, "single"],
+    "radix": true,
+    "semicolon": [true],
+    "triple-equals": [true, "allow-null-check"],
+    "variable-name": [true, "allow-pascal-case"],
+    "whitespace": [true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type"
+    ]
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "name": "frontvue",
+  "version": "0.0.0-development",
+  "description": "Front-End build system using Gulp, Stylus, Vue and TypeScript",
+  "main": "dist/frontvue.js",
+  "author": "Ovidiu Barabula <lectii2008@gmail.com> (https://github.com/0vidiu)",
+  "license": "MIT",
+  "scripts": {
+    "commit": "git-cz",
+    "setup": "",
+    "dev": "cross-env NODE_ENV=development webpack --watch",
+    "test": "cross-env NODE_ENV=test nyc mocha",
+    "test:watch": "cross-env NODE_ENV=test mocha --watch",
+    "lint:js": "eslint --max-warnings=0 ./",
+    "lint:ts": "tslint -t stylish -c tslint.json -p tsconfig.json",
+    "lint": "$(yarn bin)/run-p lint:*",
+    "prebuild": "rimraf ./dist",
+    "build": "cross-env NODE_ENV=production webpack",
+    "validate": "$(yarn bin)/run-p lint test build",
+    "report-coverage": "cat ./coverage/lcov.info | codecov",
+    "semantic-release": "semantic-release",
+    "travis-deploy-once": "travis-deploy-once"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/0vidiu/frontvue.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/0vidiu/frontvue/issues"
+  },
+  "homepage": "https://github.com/0vidiu/frontvue#readme",
+  "keywords": [
+    "front-end",
+    "web",
+    "development",
+    "vuejs",
+    "vue",
+    "build",
+    "gulp",
+    "stylus",
+    "deploy"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.0.0-beta.40",
+    "@babel/preset-env": "^7.0.0-beta.40",
+    "@babel/register": "^7.0.0-beta.40",
+    "@types/chai": "^4.1.2",
+    "@types/lodash": "^4.14.104",
+    "@types/mocha": "^2.2.48",
+    "@types/mock-fs": "^3.6.30",
+    "@types/node": "^9.4.7",
+    "awesome-typescript-loader": "^5.0.0-1",
+    "babel-eslint": "^8.2.2",
+    "chai": "^4.1.2",
+    "codecov": "^3.0.0",
+    "commitizen": "^2.9.6",
+    "cross-env": "^5.1.3",
+    "cz-conventional-changelog": "^2.1.0",
+    "eslint": "^4.18.2",
+    "eslint-plugin-babel": "^4.1.2",
+    "ghooks": "^2.0.2",
+    "lodash": "^4.17.5",
+    "mocha": "^5.0.4",
+    "mock-fs": "^4.4.2",
+    "npm-run-all": "^4.1.2",
+    "nyc": "^11.4.1",
+    "rimraf": "^2.6.2",
+    "semantic-release": "^12.4.1",
+    "source-map-support": "^0.5.3",
+    "travis-deploy-once": "^4.3.4",
+    "ts-loader": "^4.0.1",
+    "ts-node": "^5.0.1",
+    "tslint": "^5.9.1",
+    "tslint-eslint-rules": "^5.1.0",
+    "tslint-loader": "^3.6.0",
+    "typescript": "^2.7.2",
+    "validate-commit-msg": "^2.14.0",
+    "webpack": "^4.1.0",
+    "webpack-cli": "^2.0.10"
+  },
+  "publishConfig": {
+    "access": "restricted"
+  },
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run validate",
+      "commit-msg": "validate-commit-msg"
+    },
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  },
+  "nyc": {
+    "check-coverage": true,
+    "statements": -5,
+    "branches": -5,
+    "functions": 100,
+    "lines": -2,
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "lcov",
+      "text"
+    ],
+    "extension": [
+      ".ts",
+      ".js"
+    ],
+    "include": [
+      "src/**/*.ts",
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "src/**/*.spec.ts",
+      "src/**/*.spec.js"
+    ]
+  }
+}
