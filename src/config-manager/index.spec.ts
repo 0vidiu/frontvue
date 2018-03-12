@@ -22,6 +22,11 @@ describe('ConfigManager', () => {
     const customReader: ConfigReaderFactory = (namespace: string) => {
       let config: Config = {};
       return {
+        destroy(): Promise<Config> {
+          const oldConfig = config;
+          delete config[namespace];
+          return Promise.resolve(oldConfig);
+        },
         fetch(): Promise<Config> {
           return Promise.resolve(config);
         },

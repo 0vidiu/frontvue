@@ -13,6 +13,7 @@ export interface Config {
 }
 
 export interface IConfigReader {
+  destroy(): Promise<Config>;
   fetch(): Promise<Config>;
   update(config: Config): Promise<boolean>;
 }
@@ -78,13 +79,29 @@ async function PackageJsonConfigReader(namespace: string, filepath?: string): Pr
     return updated;
   }
 
+
+  /**
+   * Remove configuration from file and return the removed config object
+   */
+  async function destroy(): Promise<Config> {
+    // Save existing config
+    const fileContent = await configFile.read();
+    // Delete config object
+    delete packageJson.config[namespace];
+    // Update the file
+    await configFile.write(packageJson);
+    return fileContent.config[namespace];
+  }
+
+
   // If no configuration object is found, initialize with an empty object
-  // if (!packageJson.hasOwnProperty('config') && !packageJson.config.hasOwnProperty(namespace)) {
   if (!hasNested(packageJson, `config.${namespace}`)) {
     await initializeEmptyConfig();
   }
 
+
   return Object.freeze({
+    destroy,
     fetch,
     update,
   });

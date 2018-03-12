@@ -48,7 +48,9 @@ describe('PackageJsonConfigReader', () => {
 
   it('instantiates with no custom filepath', async () => {
     mockfs.restore();
-    const configReader = await PackageJsonConfigReader('frontvue');
+    expect(await PackageJsonConfigReader('frontvue'))
+      .to.be.an('object')
+      .to.have.all.keys('destroy', 'fetch', 'update');
   });
 
 
@@ -75,8 +77,7 @@ describe('PackageJsonConfigReader', () => {
   it('instantiates with prior Frontvue config object', async () => {
     const filepath = path.join(testDir, priorConfiguredFile);
     const configReader = await PackageJsonConfigReader('frontvue', filepath);
-    const config = await configReader.fetch();
-    expect(config).to.eql({ key: 'value' });
+    expect(await configReader.fetch()).to.eql({ key: 'value' });
   });
 
 
@@ -84,8 +85,15 @@ describe('PackageJsonConfigReader', () => {
     const filepath = path.join(testDir, noConfigFile);
     const configReader = await PackageJsonConfigReader('frontvue', filepath);
     const updated = await configReader.update({ key: 'value' });
-    const config = await configReader.fetch();
-    expect(config).to.eql({ key: 'value' });
+    expect(await configReader.fetch()).to.eql({ key: 'value' });
+  });
+
+
+  it('removes config from file and returns it', async () => {
+    const filepath = path.join(testDir, priorConfiguredFile);
+    const configReader = await PackageJsonConfigReader('frontvue', filepath);
+    expect(await configReader.destroy()).to.eql({ key: 'value' });
+    expect(await configReader.fetch()).to.be.undefined;
   });
 
 
