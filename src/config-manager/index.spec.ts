@@ -9,11 +9,12 @@ describe('ConfigManager', () => {
   const configFile = 'package.json';
   let configManager: IConfigManager;
 
+
   beforeEach(async () => configManager = await ConfigManagerFactory('frontvue'));
 
 
   it('instantiates', async () => {
-    expect(configManager).to.be.an('object').to.have.all.keys('has', 'set', 'get');
+    expect(configManager).to.be.an('object').to.have.all.keys('get', 'has', 'remove', 'set');
   });
 
 
@@ -32,26 +33,55 @@ describe('ConfigManager', () => {
     };
 
     const customConfigManager = await ConfigManagerFactory('frontvue', customReader);
-    expect(customConfigManager).to.be.an('object').to.have.all.keys('has', 'set', 'get');
+    expect(customConfigManager).to.be.an('object').to.have.all.keys('get', 'has', 'remove', 'set');
   });
 
 
   it('gets all options', async () => {
-    expect(configManager.get()).to.be.an('object');
+    expect(await configManager.get()).to.be.an('object');
   });
 
 
   it('sets an option', async () => {
     configManager.set('key', 'value');
-    expect(configManager.get('key')).to.equal('value');
+    expect(await configManager.get('key')).to.equal('value');
   });
 
-  it('gets one option', async () => {
-    expect(configManager.get('key')).to.equal('value');
+
+  it('sets an object of options', async () => {
+    const saved = await configManager.set({
+      key2: 'value2',
+      key3: 'value3',
+    });
+    expect(await configManager.has('key2')).to.be.true;
+    expect(await configManager.has('key3')).to.be.true;
+  });
+
+
+  it('returns false if not called properly', async () => {
+    expect(await configManager.set({})).to.be.false;
   });
 
 
   it('checks if option exists', async () => {
-    expect(configManager.has('key')).to.be.true;
+    expect(await configManager.has('key')).to.be.true;
+  });
+
+
+  it('gets one option', async () => {
+    expect(await configManager.get('key')).to.equal('value');
+  });
+
+
+  it('removes one option', async () => {
+    const removed = await configManager.remove('key');
+    const config = await configManager.get();
+    expect(Object.keys(config).includes('key')).to.be.false;
+  });
+
+
+  it('removes multiple options', async () => {
+    const removed = await configManager.remove('key2', 'key3');
+    expect(await configManager.get()).to.eql({});
   });
 });

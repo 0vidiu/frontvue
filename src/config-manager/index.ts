@@ -13,9 +13,10 @@ import PackageJsonConfigReader, {
 
 
 export interface IConfigManager {
-  has(key: string): boolean;
-  get(key?: string): any;
-  set(key: string, value: any): Promise<boolean>;
+  has(key: string): Promise<boolean>;
+  get(key?: string): Promise<Config | any>;
+  set(option: Config | string, value?: any): Promise<boolean>;
+  remove(...options: string[]): Promise<boolean>;
 }
 
 /**
@@ -39,14 +40,15 @@ async function ConfigManagerFactory(
   }
 
   // Get the configuration contents
-  const config: Config = await configReader.fetch();
+  let config: Config = await configReader.fetch();
 
 
   /**
    * Check if key exists in config
    * @param key Configuration option key
    */
-  function has(key: string): boolean {
+  async function has(key: string): Promise<boolean> {
+    config = await configReader.fetch();
     return config.hasOwnProperty(key);
   }
 
@@ -55,7 +57,9 @@ async function ConfigManagerFactory(
    * Retrieve value from configuration
    * @param key Configuration option key
    */
-  function get(key?: string): Config | any {
+  async function get(key?: string): Promise<Config | any> {
+    config = await configReader.fetch();
+
     if (typeof key === 'undefined') {
       return config;
     }
@@ -65,20 +69,42 @@ async function ConfigManagerFactory(
 
 
   /**
-   * Set new value for configuration option
-   * @param key Configuration option key
-   * @param value New value to be set
+   * Set new value(s) in configuration
+   * @param option Configuration object or object key
+   * @param value New value to be set if option is an object key ("string")
    */
-  async function set(key: string, value: any): Promise<boolean> {
-    config[key] = value;
-    const saved = await configReader.update(config);
+  async function set(option: Config | string, value?: any): Promise<boolean> {
+    // If we're passing in a "key" and a "value"
+    if (typeof option === 'string' && typeof value !== 'undefined') {
+      config[option] = value;
+    // If we're passing in an object of key/value pairs
+    } else if (typeof option === 'object' && Object.keys(option).length > 0) {
+      config = { ...config, ...option };
+    } else {
+      return false;
+    }
+
+    const saved: boolean = await configReader.update(config);
     return saved;
   }
+
+
+  /**
+   * Removes one or more options from config
+   * @param option Option name or array of option names
+   */
+  async function remove(...options: string[]): Promise<boolean> {
+    options.forEach(item => delete config[item]);
+    const saved: boolean = await configReader.update(config);
+    return saved;
+  }
+
 
   // Returning config manager public API
   return Object.freeze({
     get,
     has,
+    remove,
     set,
   });
 }
