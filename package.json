@@ -8,13 +8,14 @@
   "scripts": {
     "commit": "git-cz",
     "setup": "",
+    "clean": "rimraf ./dist",
     "dev": "cross-env NODE_ENV=development webpack --watch",
     "test": "cross-env NODE_ENV=test nyc mocha",
     "test:watch": "cross-env NODE_ENV=test mocha --watch",
     "lint:js": "eslint --max-warnings=0 ./",
     "lint:ts": "tslint -t stylish -c tslint.json -p tsconfig.json",
     "lint": "$(yarn bin)/run-p lint:*",
-    "prebuild": "rimraf ./dist",
+    "prebuild": "yarn clean",
     "build": "cross-env NODE_ENV=production webpack",
     "validate": "$(yarn bin)/run-p lint test build",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
@@ -43,11 +44,15 @@
     "stylus",
     "deploy"
   ],
+  "dependencies": {
+    "commander": "^2.15.0"
+  },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.40",
     "@babel/preset-env": "^7.0.0-beta.40",
     "@babel/register": "^7.0.0-beta.40",
     "@types/chai": "^4.1.2",
+    "@types/commander": "^2.12.2",
     "@types/lodash": "^4.14.104",
     "@types/mocha": "^2.2.48",
     "@types/mock-fs": "^3.6.30",
