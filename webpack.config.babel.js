@@ -1,4 +1,5 @@
 import '@babel/register';
+import webpack from 'webpack';
 import path from 'path';
 import packageJson from './package.json';
 
@@ -16,7 +17,10 @@ const library = packageJson.name;
 const configuration = {
   mode: process.env.NODE_ENV || 'development',
 
-  entry: './src/index.ts',
+  entry: {
+    core: path.join(include, 'core.ts'),
+    cli: path.join(include, 'cli/cli.ts'),
+  },
 
   target: 'node',
 
@@ -54,6 +58,15 @@ const configuration = {
   optimization: {
     minimize: false,
   },
+
+  plugins: [
+    new webpack.BannerPlugin({
+      raw: true,
+      entryOnly: true,
+      include: /cli/,
+      banner: '#!/usr/bin/env node \n',
+    }),
+  ],
 };
 
 if (isDevelopment) {
@@ -68,7 +81,7 @@ if (isDevelopment) {
 const mainConfiguration = Object.assign({}, configuration, {
   output: {
     path: dist,
-    filename: `${packageJson.name}.js`,
+    filename: `${packageJson.name}.[name].js`,
     library,
     libraryTarget: 'commonjs2',
     libraryExport: 'default',
@@ -78,7 +91,7 @@ const mainConfiguration = Object.assign({}, configuration, {
 const mainMinifiedConfiguration = Object.assign({}, mainConfiguration, {
   output: {
     path: dist,
-    filename: `${packageJson.name}.min.js`,
+    filename: `${packageJson.name}.[name].min.js`,
     library,
     libraryTarget: 'commonjs2',
     libraryExport: 'default',
