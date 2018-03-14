@@ -6,8 +6,10 @@
  */
 
 import ConfigManagerFactory from './config-manager/index';
+import TaskManager from './task-manager/index';
 
 (async function frontvue() {
   const name = 'frontvue';
   const configManager = await ConfigManagerFactory(name);
+  const taskManager = TaskManager();
 }());
