@@ -5,25 +5,30 @@
  * @since 0.1.0
  */
 
+import * as gulp from 'gulp';
 import { hasNested, limitFn } from '../util/utility-functions';
 
 
-interface ITask {
+export interface ITask {
+  name?: string;
+  description?: string;
   install(subscriber: ITaskSubscriber): void;
 }
 
-interface ITasks {
+export interface ITasks {
   [key: string]: string[];
 }
 
-interface ITaskSubscriber {
-  [hook: string]: () => string;
+export interface ITaskSubscriber {
+  [hook: string]: (taskName: string) => string;
 }
 
-interface ITaskManager {
+export interface ITaskManager {
   add(task: ITask): void;
-  getHooks(): string[];
-  getTasks(): ITasks;
+  run(hook: string): Promise<boolean>;
+  hasTasks?(hook: string): boolean;
+  getTasks?(): ITasks;
+  getHooks?(): string[];
 }
 
 interface ITaskManagerOptions {
@@ -39,9 +44,9 @@ export const ERRORS = {
 
 /**
  * Create TaskManager
- * @param options TaskManagerFactory options object
+ * @param options TaskManager options object
  */
-function TaskManagerFactory(options?: ITaskManagerOptions): ITaskManager {
+function TaskManager(options?: ITaskManagerOptions): ITaskManager {
   let hooks: string[] = [];
   const tasks: ITasks = {};
 
@@ -50,6 +55,10 @@ function TaskManagerFactory(options?: ITaskManagerOptions): ITaskManager {
   }
 
 
+  /**
+   * Register new task
+   * @param task Task object
+   */
   function add(task: ITask): void {
     if (
       typeof task !== 'object' ||
@@ -63,10 +72,38 @@ function TaskManagerFactory(options?: ITaskManagerOptions): ITaskManager {
   }
 
 
+  /**
+   * Runs tasks associated with the passed hook
+   * @param hook Name of the hook
+   */
+  function run(hook: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      const onError = (error?: Error) => reject(error || false);
+
+      if (hasTasks(hook)) {
+        gulp.parallel(tasks[hook])(onError);
+        return resolve(true);
+      }
+
+      // TODO: Log out error message using custom logger
+      console.log(`>>> hook ${hook} doesn't exist or doesn't have any tasks`);
+      return resolve(false);
+    });
+  }
+
+
+  /**
+   * Create the subscriptions object
+   * Used by registering plugins to attach tasks to specific hooks
+   */
   function createSubscriptions(): ITaskSubscriber {
+    // Create an object with each hook name as a method
     return hooks.reduce((subscribers, hook) => {
+      // Create individual hook registering method
       const subscriber = {
+        // We're using limitFn to make sure the method can't be called multiple times
         [hook]: limitFn(function (task: string): boolean {
+          // Subscribe the task to the hook
           return subscribe(task, hook);
         }),
       };
@@ -78,10 +115,12 @@ function TaskManagerFactory(options?: ITaskManagerOptions): ITaskManager {
 
 
   function subscribe(task: string, hook: string): boolean {
+    // Create new array for hook, if not available
     if (!hasNested(tasks, hook)) {
       tasks[hook] = [];
     }
 
+    // Make sure a task is not added twice
     if (tasks[hook].includes(task)) {
       return false;
     }
@@ -92,21 +131,49 @@ function TaskManagerFactory(options?: ITaskManagerOptions): ITaskManager {
   }
 
 
+  /**
+   * Get a list of all available
+   */
   function getHooks(): string[] {
     return [...hooks];
   }
 
 
+  /**
+   * Check if specific hook has any tasks registered to it
+   * @param hook Name of the hook
+   */
+  function hasTasks(hook: string): boolean {
+    return Object.keys(tasks).includes(hook) && tasks[hook].length > 0;
+  }
+
+
+  /**
+   * Get a clone of the tasks object
+   */
   function getTasks(): ITasks {
     return JSON.parse(JSON.stringify(tasks));
   }
 
 
-  return Object.freeze({
+  // Creating the public API object
+  let publicApi: ITaskManager = {
     add,
+    run,
+  };
+
+
+  // Adding private methods to public API in test environment
+  /* test:start */
+  publicApi = {...publicApi,
     getHooks,
     getTasks,
-  });
+    hasTasks,
+  };
+  /* test:end */
+
+
+  return Object.freeze(publicApi);
 }
 
-export default TaskManagerFactory;
+export default TaskManager;

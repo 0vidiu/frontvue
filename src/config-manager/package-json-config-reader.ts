@@ -18,7 +18,7 @@ export interface IConfigReader {
   update(config: Config): Promise<boolean>;
 }
 
-export type ConfigReaderFactory = (namespace: string, filepath?: string) => IConfigReader;
+export type ConfigReader = (namespace: string, filepath?: string) => IConfigReader;
 
 export const ERRORS = {
   NO_NAMESPACE: 'PackageJsonConfigReader requires parameter 1 to be string',

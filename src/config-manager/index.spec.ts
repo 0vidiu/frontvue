@@ -1,8 +1,8 @@
 import { assert, expect } from 'chai';
 import 'mocha';
 import * as path from 'path';
-import ConfigManagerFactory, { IConfigManager } from './index';
-import { Config, ConfigReaderFactory, IConfigReader } from './package-json-config-reader';
+import ConfigManager, { IConfigManager } from './index';
+import { Config, ConfigReader, IConfigReader } from './package-json-config-reader';
 
 describe('ConfigManager', () => {
   const testDir = '/tmp/tests/';
@@ -10,7 +10,7 @@ describe('ConfigManager', () => {
   let configManager: IConfigManager;
 
 
-  beforeEach(async () => configManager = await ConfigManagerFactory('frontvue'));
+  beforeEach(async () => configManager = await ConfigManager('frontvue'));
 
 
   it('instantiates', async () => {
@@ -19,7 +19,7 @@ describe('ConfigManager', () => {
 
 
   it('instantiates with custom config reader', async () => {
-    const customReader: ConfigReaderFactory = (namespace: string) => {
+    const customReader: ConfigReader = (namespace: string) => {
       let config: Config = {};
       return {
         destroy(): Promise<Config> {
@@ -37,7 +37,7 @@ describe('ConfigManager', () => {
       };
     };
 
-    const customConfigManager = await ConfigManagerFactory('frontvue', customReader);
+    const customConfigManager = await ConfigManager('frontvue', customReader);
     expect(customConfigManager).to.be.an('object').to.have.all.keys('get', 'has', 'remove', 'set');
   });
 

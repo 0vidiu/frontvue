@@ -9,7 +9,7 @@ interface NestedObject {
   [key: string]: any;
 }
 
-type AnyFunction = (...args: any[]) => any;
+export type AnyFunction = (...args: any[]) => any;
 
 
 export const ERRORS = {
