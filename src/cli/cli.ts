@@ -6,6 +6,7 @@
  */
 
 import * as program from 'commander';
+import frontvue from '../core';
 
 program
   .version('0.1.0')
@@ -18,12 +19,26 @@ program
 
 program
   .command('init [name]')
-    .action(name => console.log(`Creating a new project ./${name}`))
+    .action(async name => {
+      console.log(`Creating a new project ./${name}`);
+      const instance = await frontvue;
+      instance.run('init');
+    })
     .description('Initialize a new project');
+
 
 program
   .command('config')
     .description('Start configuration wizard')
     .action(() => console.log('Starting configuration...'));
+
+
+program
+  .command('run [hook]')
+    .description('Run tasks in a hook')
+    .action(async hook => {
+      const instance = await frontvue;
+      instance.run(hook);
+    });
 
 program.parse(process.argv);
