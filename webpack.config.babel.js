@@ -1,5 +1,6 @@
 import '@babel/register';
 import webpack from 'webpack';
+import webpackPermissionsPlugin from 'webpack-permissions-plugin';
 import path from 'path';
 import packageJson from './package.json';
 
@@ -69,6 +70,7 @@ const configuration = {
   },
 
   plugins: [
+    // Add shebang statement to CLI file
     new webpack.BannerPlugin({
       raw: true,
       entryOnly: true,
@@ -96,6 +98,18 @@ const mainConfiguration = Object.assign({}, configuration, {
     libraryExport: 'default',
   },
 });
+
+// Make CLI file executable
+mainConfiguration.plugins.push(
+  new webpackPermissionsPlugin({
+    buildFiles: [
+      {
+        path: path.resolve(dist, `${packageJson.name}.cli.js`),
+        fileMode: '755',
+      },
+    ],
+  })
+);
 
 const mainMinifiedConfiguration = Object.assign({}, mainConfiguration, {
   output: {
