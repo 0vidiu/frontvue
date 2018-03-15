@@ -65,6 +65,10 @@ const configuration = {
     ],
   },
 
+  externals: {
+    gulp: 'gulp',
+  },
+
   optimization: {
     minimize: false,
   },
