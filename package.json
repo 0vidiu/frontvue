@@ -3,6 +3,7 @@
   "version": "0.0.0-development",
   "description": "Front-End build system using Gulp, Stylus, Vue and TypeScript",
   "main": "dist/frontvue.js",
+  "types": "types/core.d.ts",
   "author": "Ovidiu Barabula <lectii2008@gmail.com> (https://github.com/0vidiu)",
   "license": "MIT",
   "bin": {
@@ -31,7 +32,8 @@
     "url": "https://github.com/0vidiu/frontvue.git"
   },
   "files": [
-    "dist"
+    "dist",
+    "types"
   ],
   "bugs": {
     "url": "https://github.com/0vidiu/frontvue/issues"

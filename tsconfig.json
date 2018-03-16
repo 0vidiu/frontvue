@@ -17,11 +17,10 @@
       "es2017",
       "esnext"
     ],
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "declaration": true,
+    "declarationDir": "types"
   },
-  "types": [
-    "node"
-  ],
   "include": [
     "src/**/*.ts"
   ],
