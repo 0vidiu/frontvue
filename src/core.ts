@@ -9,6 +9,7 @@ import ConfigManager from './config-manager';
 import PluginManager from './plugin-manager';
 import TaskManager from './task-manager';
 import taskInitProject from './tasks/task-init-project';
+import Logger, { ILogger } from './util/logger';
 
 
 /**
@@ -16,6 +17,7 @@ import taskInitProject from './tasks/task-init-project';
  */
 async function Frontvue() {
   const name = 'frontvue';
+  const logger = Logger(name);
   const configManager = await ConfigManager(name);
   const taskManager = TaskManager({
     hooks: [
@@ -30,6 +32,7 @@ async function Frontvue() {
 
   // Return public API
   return Object.freeze({
+    logger,
     name,
     run,
   });

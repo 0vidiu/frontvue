@@ -20,8 +20,9 @@ program
 program
   .command('init [name]')
     .action(async name => {
-      console.log(`Creating a new project ./${name}`);
       const instance = await frontvue;
+      const logger = instance.logger('cli');
+      logger.info(`Creating a new project ./${name}`);
       instance.run('init');
     })
     .description('Initialize a new project');
@@ -38,6 +39,8 @@ program
     .description('Run tasks in a hook')
     .action(async hook => {
       const instance = await frontvue;
+      const logger = instance.logger('cli');
+      logger.info(`Starting ${hook}...`);
       instance.run(hook);
     });
 

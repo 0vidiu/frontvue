@@ -51,6 +51,7 @@
     "deploy"
   ],
   "dependencies": {
+    "chalk": "^2.3.2",
     "commander": "^2.15.0"
   },
   "peerDependencies": {
@@ -61,6 +62,7 @@
     "@babel/preset-env": "^7.0.0-beta.40",
     "@babel/register": "^7.0.0-beta.40",
     "@types/chai": "^4.1.2",
+    "@types/chalk": "^2.2.0",
     "@types/commander": "^2.12.2",
     "@types/gulp": "^4.0.5",
     "@types/lodash": "^4.14.104",
@@ -86,6 +88,7 @@
     "rimraf": "^2.6.2",
     "semantic-release": "^12.4.1",
     "source-map-support": "^0.5.3",
+    "test-console": "^1.1.0",
     "travis-deploy-once": "^4.3.4",
     "ts-loader": "^4.0.1",
     "ts-node": "^5.0.1",

@@ -6,9 +6,12 @@
  */
 
 import * as gulp from 'gulp';
+import { Task } from '../task-manager';
 import PlugableTask from '../task-manager/plugable-task';
+import Logger from '../util/logger';
 import { AnyFunction } from '../util/utility-functions';
 
+const logger = Logger('frontvue')('init');
 
 // Task meta data
 const hook = 'init';
@@ -21,7 +24,7 @@ const description = 'Task for initializing a new project';
  * @param done Gulp async callback
  */
 function task(done?: AnyFunction): any {
-  console.log(`>>> Running Task: ${name}`);
+  logger.log(`Running Task: ${name}`);
   done && done();
 }
 

@@ -31,7 +31,7 @@ export interface TaskManager {
   getHooks?(): string[];
 }
 
-interface TaskManagerOptions {
+export interface TaskManagerOptions {
   [key: string]: any;
 }
 

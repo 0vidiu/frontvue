@@ -5,7 +5,7 @@
  * @since 0.1.0
  */
 
-interface NestedObject {
+export interface NestedObject {
   [key: string]: any;
 }
 

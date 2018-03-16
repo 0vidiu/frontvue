@@ -19,6 +19,7 @@ export interface IConfigManager {
   remove(...options: string[]): Promise<boolean>;
 }
 
+
 /**
  * Configuration manager constructor
  * @param namespace Configuration namespace, usually app name
