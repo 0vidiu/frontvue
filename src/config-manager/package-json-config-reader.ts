@@ -12,13 +12,13 @@ export interface Config {
   [key: string]: any;
 }
 
-export interface IConfigReader {
+export interface ConfigReader {
   destroy(): Promise<Config>;
   fetch(): Promise<Config>;
   update(config: Config): Promise<boolean>;
 }
 
-export type ConfigReader = (namespace: string, filepath?: string) => IConfigReader;
+export type ConfigReaderConstructor = (namespace: string, filepath?: string) => ConfigReader;
 
 export const ERRORS = {
   NO_NAMESPACE: 'PackageJsonConfigReader requires parameter 1 to be string',
@@ -29,7 +29,7 @@ export const ERRORS = {
  * Factory function for package.json configuration reader
  * @param namespace Configuration key in package.json 'config' object
  */
-async function PackageJsonConfigReader(namespace: string, filepath?: string): Promise<IConfigReader> {
+async function PackageJsonConfigReader(namespace: string, filepath?: string): Promise<ConfigReader> {
   if (typeof namespace === 'undefined') {
     throw new Error(ERRORS.NO_NAMESPACE);
   }

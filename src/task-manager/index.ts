@@ -9,29 +9,29 @@ import * as gulp from 'gulp';
 import { hasNested, limitFn } from '../util/utility-functions';
 
 
-export interface ITask {
+export interface Task {
   name?: string;
   description?: string;
-  install(subscriber: ITaskSubscriber): void;
+  install(subscriber: TaskSubscriber): void;
 }
 
-export interface ITasks {
+export interface Tasks {
   [key: string]: string[];
 }
 
-export interface ITaskSubscriber {
+export interface TaskSubscriber {
   [hook: string]: (taskName: string) => string;
 }
 
-export interface ITaskManager {
-  add(task: ITask): void;
+export interface TaskManager {
+  add(task: Task): void;
   run(hook: string): Promise<boolean>;
   hasTasks?(hook: string): boolean;
-  getTasks?(): ITasks;
+  getTasks?(): Tasks;
   getHooks?(): string[];
 }
 
-interface ITaskManagerOptions {
+interface TaskManagerOptions {
   [key: string]: any;
 }
 
@@ -46,9 +46,9 @@ export const ERRORS = {
  * Create TaskManager
  * @param options TaskManager options object
  */
-function TaskManager(options?: ITaskManagerOptions): ITaskManager {
+function TaskManager(options?: TaskManagerOptions): TaskManager {
   let hooks: string[] = [];
-  const tasks: ITasks = {};
+  const tasks: Tasks = {};
 
   if (options && hasNested(options, 'hooks')) {
     hooks = [...hooks, ...options.hooks];
@@ -59,7 +59,7 @@ function TaskManager(options?: ITaskManagerOptions): ITaskManager {
    * Register new task
    * @param task Task object
    */
-  function add(task: ITask): void {
+  function add(task: Task): void {
     if (
       typeof task !== 'object' ||
       !task.hasOwnProperty('install') ||
@@ -96,7 +96,7 @@ function TaskManager(options?: ITaskManagerOptions): ITaskManager {
    * Create the subscriptions object
    * Used by registering plugins to attach tasks to specific hooks
    */
-  function createSubscriptions(): ITaskSubscriber {
+  function createSubscriptions(): TaskSubscriber {
     // Create an object with each hook name as a method
     return hooks.reduce((subscribers, hook) => {
       // Create individual hook registering method
@@ -151,13 +151,13 @@ function TaskManager(options?: ITaskManagerOptions): ITaskManager {
   /**
    * Get a clone of the tasks object
    */
-  function getTasks(): ITasks {
+  function getTasks(): Tasks {
     return JSON.parse(JSON.stringify(tasks));
   }
 
 
   // Creating the public API object
-  let publicApi: ITaskManager = {
+  let publicApi: TaskManager = {
     add,
     run,
   };

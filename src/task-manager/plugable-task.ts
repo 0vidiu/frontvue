@@ -6,7 +6,7 @@
  */
 
 import * as gulp from 'gulp';
-import { ITask, ITaskSubscriber } from '../task-manager';
+import { Task, TaskSubscriber } from '../task-manager';
 import { AnyFunction } from '../util/utility-functions';
 
 
@@ -25,7 +25,7 @@ export const ERRORS = {
  * @param name Task name
  * @param description Task description
  */
-function PlugableTask(task: AnyFunction, hook: string, name: string, description?: string): ITask {
+function PlugableTask(task: AnyFunction, hook: string, name: string, description?: string): Task {
   // Validate arguments
   if (typeof task === 'undefined' || typeof task !== 'function') {
     throw new Error(ERRORS.TASK_INVALID);
@@ -49,7 +49,7 @@ function PlugableTask(task: AnyFunction, hook: string, name: string, description
    * Task plugin installer function
    * @param subscribers Hook subscribers object
    */
-  function install(subscribers: ITaskSubscriber): void {
+  function install(subscribers: TaskSubscriber): void {
     // Register Gulp task
     gulp.task(name, task);
 

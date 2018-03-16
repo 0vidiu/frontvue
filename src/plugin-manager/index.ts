@@ -5,16 +5,16 @@
  * @since 0.1.0
  */
 
-import { ITaskManager, ITaskSubscriber } from '../task-manager';
+import { TaskManager, TaskSubscriber } from '../task-manager';
 
 
-interface IPlugin {
-  install(subscribers: ITaskSubscriber): void;
+export interface Plugin {
+  install(subscribers: TaskSubscriber): void;
 }
 
-interface IPluginManager {
-  use(plugin: IPlugin | string): void;
-  validate?(plugin: IPlugin): boolean;
+export interface PluginManager {
+  use(plugin: Plugin | string): void;
+  validate?(plugin: Plugin): boolean;
 }
 
 
@@ -29,7 +29,7 @@ export const ERRORS = {
 /**
  * PluginManager constructor
  */
-function PluginManager(taskManager: ITaskManager): IPluginManager {
+function PluginManager(taskManager: TaskManager): PluginManager {
   if (
     typeof taskManager === 'undefined' ||
     typeof taskManager !== 'object' ||
@@ -43,7 +43,7 @@ function PluginManager(taskManager: ITaskManager): IPluginManager {
    * Validate plugin
    * @param plugin Plugin object
    */
-  function validate(plugin: IPlugin): boolean {
+  function validate(plugin: Plugin): boolean {
     if (typeof plugin === 'undefined' || typeof plugin !== 'object') {
       throw new Error(ERRORS.PLUGIN_INVALID);
     }
@@ -60,14 +60,14 @@ function PluginManager(taskManager: ITaskManager): IPluginManager {
    * Register plugin
    * @param plugin Plugin object
    */
-  function use(plugin: IPlugin): void {
+  function use(plugin: Plugin): void {
     validate(plugin);
     taskManager.add(plugin);
   }
 
 
   // Creating the public API object
-  let publicApi: IPluginManager = {
+  let publicApi: PluginManager = {
     use,
   };
 

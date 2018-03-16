@@ -1,5 +1,6 @@
 import { assert, expect } from 'chai';
 import 'mocha';
+import { Task } from './index';
 import PlugableTask, { ERRORS } from './plugable-task';
 
 describe('PlugableTask', () => {
@@ -7,7 +8,7 @@ describe('PlugableTask', () => {
   const hook = 'hook';
   const name = 'task-name';
   const description = 'Task description';
-  let plugin;
+  let plugin: Task;
 
   beforeEach(() => {
     plugin = PlugableTask(task, hook, name, description);

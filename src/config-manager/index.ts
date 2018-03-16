@@ -8,7 +8,7 @@
 import PackageJsonConfigReader, {
   Config,
   ConfigReader,
-  IConfigReader,
+  ConfigReaderConstructor,
 } from './package-json-config-reader';
 
 
@@ -20,15 +20,16 @@ export interface IConfigManager {
 }
 
 /**
- * Create Configuration manager
- * @param namespace Configuration namespace, usually app name (used in package.json { config: { <namespace>: {} } })
+ * Configuration manager constructor
+ * @param namespace Configuration namespace, usually app name
+ * used in package.json "{ "config": { "<namespace>": {} } }"
  * @param customReader Custom ConfigReader
  */
 async function ConfigManager(
   namespace: string,
-  customReader?: ConfigReader,
+  customReader?: ConfigReaderConstructor,
 ): Promise<IConfigManager> {
-  let configReader: IConfigReader;
+  let configReader: ConfigReader;
 
   // Check for custom config reader
   if (customReader && typeof customReader === 'function') {

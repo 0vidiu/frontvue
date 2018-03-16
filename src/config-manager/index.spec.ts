@@ -2,7 +2,7 @@ import { assert, expect } from 'chai';
 import 'mocha';
 import * as path from 'path';
 import ConfigManager, { IConfigManager } from './index';
-import { Config, ConfigReader, IConfigReader } from './package-json-config-reader';
+import { Config, ConfigReader } from './package-json-config-reader';
 
 describe('ConfigManager', () => {
   const testDir = '/tmp/tests/';
@@ -19,7 +19,7 @@ describe('ConfigManager', () => {
 
 
   it('instantiates with custom config reader', async () => {
-    const customReader: ConfigReader = (namespace: string) => {
+    const customReader = (namespace: string) => {
       let config: Config = {};
       return {
         destroy(): Promise<Config> {

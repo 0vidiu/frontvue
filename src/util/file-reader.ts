@@ -7,7 +7,7 @@
 
 import * as fs from 'fs';
 
-interface IFileReader {
+interface FileReader {
   read(): Promise<any>;
   write(object: object): Promise<boolean>;
 }
@@ -24,7 +24,7 @@ export const ERRORS = {
  * Provides methods for interacting with JSON-like files
  * @param filepath File path
  */
-function FileReader(filepath: string): IFileReader {
+function FileReader(filepath: string): FileReader {
   'use strict';
 
   if (typeof filepath === 'undefined') {

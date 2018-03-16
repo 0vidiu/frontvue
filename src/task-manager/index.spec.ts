@@ -1,13 +1,13 @@
 import { assert, expect } from 'chai';
 import * as gulp from 'gulp';
 import 'mocha';
-import TaskManager, { ERRORS } from './index';
+import TaskManager, { ERRORS, TaskSubscriber } from './index';
 
 
 // Helper: create custom hook task
 function makeTask(hook: string, register: boolean = true) {
   return {
-    install(subscriptions) {
+    install(subscriptions: TaskSubscriber) {
       // Register Gulp test task
       register && gulp.task(`${hook}-task`, done => done());
 
@@ -43,7 +43,7 @@ describe('TaskManager', () => {
   it('returns task arrays for all hooks', () => {
     const taskManager = TaskManager(options);
     const task = {
-      install(subscribers) {
+      install(subscribers: TaskSubscriber) {
         expect(subscribers)
           .to.be.an('object')
           .to.have.all.keys(options.hooks)
@@ -72,7 +72,7 @@ describe('TaskManager', () => {
   it('returns true on task subscription', () => {
     const taskManager = TaskManager(options);
     const task = {
-      install(subscriptions) {
+      install(subscriptions: TaskSubscriber) {
         expect(subscriptions.before('before-task')).to.be.true;
       },
     };
@@ -114,12 +114,12 @@ describe('TaskManager', () => {
 
   it('returns false when trying to subscribe an already subscribed task name', () => {
     const task1 = {
-      install(subscriptions) {
+      install(subscriptions: TaskSubscriber) {
         expect(subscriptions.before('same-task-name')).to.be.true;
       },
     };
     const task2 = {
-      install(subscriptions) {
+      install(subscriptions: TaskSubscriber) {
         expect(subscriptions.before('same-task-name')).to.be.false;
       },
     };
@@ -132,7 +132,7 @@ describe('TaskManager', () => {
 
   it('should not allow more than 1 subscription per hook', () => {
     const abusingTask = {
-      install(subscriptions) {
+      install(subscriptions: TaskSubscriber) {
         expect(subscriptions.before('task-name')).to.be.true;
         expect(subscriptions.before('devious-new-name')).to.be.undefined;
       },
