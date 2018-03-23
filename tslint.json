@@ -11,7 +11,12 @@
     "forin": true,
     "indent": [true, "spaces"],
     "label-position": true,
-    "max-line-length": [true, 120],
+    "max-line-length": [true,
+      {
+        "limit": 120,
+        "ignore-pattern": "\\b((const|let|var)|(: ('|\"|`))).+('|\"|`)"
+      }
+    ],
     "no-arg": true,
     "no-bitwise": true,
     "no-console": [true,
