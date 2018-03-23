@@ -5,6 +5,8 @@
  * @since 0.1.0
  */
 
+import Logger, { ILogger } from './logger';
+
 export interface NestedObject {
   [key: string]: any;
 }
@@ -13,11 +15,24 @@ export type AnyFunction = (...args: any[]) => any;
 
 
 export const ERRORS = {
-  LIMIT_NOT_A_NUMBER: 'Limit argument must be a number',
-  NOT_A_FUNCTION: 'Passed argument is not a function',
-  RANGE_LIMITS_EQUAL: 'Range limits cannot be equal',
-  RANGE_NEEDS_NUMBERS: 'Range limit arguments must be numbers',
-  RANGE_NEEDS_TWO_PARAMS: 'Range requires two number parameters',
+  // hasNested()
+  HAS_NESTED_NOT_AN_OBJECT: 'hasNested() requires first argument <object> to be of type \'object\'',
+  HAS_NESTED_NOT_A_STRING: 'hasNested() requires second argument <path> to be of type \'string\' or \'array\' of strings',
+
+  // limitFn()
+  LIMIT_NOT_A_NUMBER: 'limitFn() requires second argument to be of type \'number\'',
+  NOT_A_FUNCTION: 'limitFn() requires first argument to be of type \'function\'',
+
+  // range()
+  RANGE_LIMITS_EQUAL: 'range() limits cannot be equal',
+  RANGE_NEEDS_NUMBERS: 'range() requires both arguments to be of type \'number\'',
+  RANGE_NEEDS_TWO_PARAMS: 'range() requires two arguments of type \'number\'',
+
+  // retry()
+  RETRY_DELAY_CANNOT_BE_ZERO: 'retry() option <delay> cannot be 0ms',
+  RETRY_NEEDS_A_FUNCTION: 'retry() requires first argument <fn> to be of type \'function\'',
+  RETRY_NEEDS_OPTIONS_TO_BE_OBJECT: 'retry() requires second argument <options> to be of type \'object\'',
+  RETRY_RETRIES_CANNOT_BE_ZERO: 'retry() option <retries> cannot be 0',
 };
 
 
@@ -27,6 +42,15 @@ export const ERRORS = {
  * @param path Dot notation path, regular key string or array of keys
  */
 export function hasNested(object: NestedObject, path: string | string[]): boolean {
+  // Arguments validation
+  if (typeof object !== 'object' || Array.isArray(object)) {
+    throw new Error(ERRORS.HAS_NESTED_NOT_AN_OBJECT);
+  }
+
+  if (typeof path !== 'string' && !Array.isArray(path)) {
+    throw new Error(ERRORS.HAS_NESTED_NOT_A_STRING);
+  }
+
   // If path is dot notation (e.g. 'object.child.subchild')
   if (typeof path === 'string' && path.includes('.')) {
     path = path.split('.');
@@ -104,4 +128,121 @@ export function range(from: number, to: number): number[] {
   // If right to left, reverse the array
   // This keeps the above loop the same in both cases
   return direction > 0 ? array : array.reverse();
+}
+
+
+/**
+ * Resolves a promise after a custom amount of time
+ * @param ms Number of miliseconds to sleep
+ */
+export function sleep(ms: number = 1000): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+
+/**
+ * Get function name
+ */
+export function getFnName(fn: AnyFunction): string {
+  return fn.name
+    ? `function '${fn.name}'`
+    : '\'anonymous\' function';
+}
+
+
+/**
+ * Takes a function and calls it, when and if it fails,
+ * it retries until it reaches max number of retries
+ * @param fn Function to be called
+ * @param options Options object
+ * @return Function's return value or last error
+ */
+export async function retry(
+  fn: AnyFunction,
+  options: {
+    // Delay in miliseconds until retry
+    delay?: number,
+    // Maximum number of retries
+    retries?: number,
+    // Custom log channel
+    logChannel?: string,
+    // Custom log namespace
+    logNamespace?: string,
+  } = {},
+): Promise<any> {
+  // Arguments validation
+  if (typeof fn !== 'function') {
+    throw new Error(ERRORS.RETRY_NEEDS_A_FUNCTION);
+  }
+
+  if (typeof options !== 'object') {
+    throw new Error(ERRORS.RETRY_NEEDS_OPTIONS_TO_BE_OBJECT);
+  }
+
+  // Get options with defaults
+  const {
+    delay = 1000,
+    retries = 3,
+    logChannel = 'retry()',
+    logNamespace = 'frontvue',
+  } = options;
+
+  // Options validation
+  if (delay === 0) {
+    throw new Error(ERRORS.RETRY_DELAY_CANNOT_BE_ZERO);
+  } else if (retries === 0) {
+    throw new Error(ERRORS.RETRY_RETRIES_CANNOT_BE_ZERO);
+  }
+
+  // Internal retry counter
+  let count: number = 0;
+  // Array to store the errors
+  const errors: Error[] = [];
+  // Logger instance
+  const logger: ILogger = Logger(logNamespace)(logChannel);
+
+
+  /**
+   * Handle error and retry
+   * @param error Caught error
+   */
+  function errorHandler(error: Error) {
+    count++;
+
+    // If this is the first retry notify the user
+    if (count === 1) {
+      logger.warn(`${getFnName(fn)} failed. Retrying...`);
+    }
+
+    // Output a nice console log for each retry
+    let logMessage = `Retrying ${getFnName(fn)} (retries left: ${retries - count})`;
+    logMessage += count === retries ? ' Aborting...' : '';
+    logger.debug(logMessage);
+
+    // Storing the error
+    errors.push(error);
+  }
+
+  // Returning a function for async functionality
+  return new Promise(async (resolve, reject) => {
+    // Stay within the maximum number of retries
+    while (count < retries) {
+      try {
+        // Happy path: resolve promise with the function's return value
+        // Here we're also converting the return value to a promise
+        // just in case it's not an async function
+        // We're also catching any errors and re-throwing them to be catched by the errorHandler
+        return resolve(
+          await Promise.resolve(fn()).catch(error => { throw error; }),
+        );
+      } catch (error) {
+        errorHandler(error);
+      }
+      // Wait a bit until we try to call again
+      await sleep(delay);
+    }
+
+    // Finally, nothing seems to work, reject the promise with the last error
+    return reject(errors[errors.length - 1]);
+  });
 }
