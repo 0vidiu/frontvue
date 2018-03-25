@@ -1,8 +1,13 @@
+import * as chai from 'chai';
+import * as chaiAspromised from 'chai-as-promised';
+chai.use(chaiAspromised);
+
 import { assert, expect } from 'chai';
 import * as fs from 'fs';
 import 'mocha';
 import * as mockfs from 'mock-fs';
 import * as path from 'path';
+import Logger from '../util/logger';
 import PackageJsonConfigReader, { ERRORS } from './package-json-config-reader';
 
 describe('PackageJsonConfigReader', () => {
@@ -10,47 +15,55 @@ describe('PackageJsonConfigReader', () => {
   const priorConfiguredFile = 'priorConfiguredFile.json';
   const noConfigFile = 'noConfigFile.json';
   const noFrontvueConfigFile = 'noFrontVueConfigFile.json';
+  const nonExistingFile = 'nonExistingConfigFile.json';
+  const readonlyConfigFile = 'readonlyConfigFile.json';
 
+  // Restore FileSystem
+  before(mockfs.restore);
+  // Mock FileSystem with dummy files
   beforeEach(() => {
+    mockfs.restore();
+    const noConfigContent = '{}';
+    const noFrontvueConfigContent = `{ "config": { "somePlugin": {} } }`;
+    const withConfigContent = `{ "config": { "frontvue": { "key": "value" } } }`;
     mockfs({
       [testDir]: {
-        [noConfigFile]: `{}`,
-        [noFrontvueConfigFile]: `{
-          "config": {
-            "somePlugin": {}
-          }
-        }`,
-        [priorConfiguredFile]: `{
-          "config": {
-            "frontvue": {
-              "key": "value"
-            }
-          }
-        }`,
+        [noConfigFile]: noConfigContent,
+        [noFrontvueConfigFile]: noFrontvueConfigContent,
+        [priorConfiguredFile]: withConfigContent,
+        [readonlyConfigFile]: mockfs.file({ content: withConfigContent, mode: 0o440 }),
       },
     });
   });
-
-
-  it('throws if no namespace is passed', async () => {
-    await PackageJsonConfigReader(undefined).catch((error: Error) => {
-      expect(error.message, ERRORS.NO_NAMESPACE);
-    });
+  // Clean up
+  afterEach(mockfs.restore);
+  after(async () => {
+    return PackageJsonConfigReader('frontvue')
+      .then(configReader => configReader.destroy());
   });
 
-
-  it('throws if namespace is not a string', async () => {
-    await PackageJsonConfigReader(1).catch((error: Error) => {
-      expect(error.message, ERRORS.NO_NAMESPACE);
-    });
-  });
-
-
-  it('instantiates with no custom filepath', async () => {
+  it('instantiates with no namespace', () => {
+    // Reading actual package.json from current folder
     mockfs.restore();
-    expect(await PackageJsonConfigReader('frontvue'))
-      .to.be.an('object')
-      .to.have.all.keys('destroy', 'fetch', 'update');
+    return expect(PackageJsonConfigReader())
+      .to.eventually.have.all.keys('destroy', 'fetch', 'update');
+  });
+
+
+  it('throws if namespace is not a string', () => {
+    // Reading actual package.json from current folder
+    mockfs.restore();
+    return expect(PackageJsonConfigReader(1))
+      .to.be.rejectedWith(ERRORS.INVALID_NAMESPACE);
+  });
+
+
+  it('instantiates with no custom filepath', () => {
+    // Reading actual package.json from current folder
+    mockfs.restore();
+    return expect(PackageJsonConfigReader('frontvue'))
+      .to.eventually.be.an('object')
+      .to.eventually.have.all.keys('destroy', 'fetch', 'update');
   });
 
 
@@ -58,10 +71,10 @@ describe('PackageJsonConfigReader', () => {
     const filepath = path.join(testDir, noConfigFile);
     const configReader = await PackageJsonConfigReader('frontvue', filepath);
     const config = await configReader.fetch();
-    const fileContents = await fs.readFile(filepath, { encoding: 'utf-8' }, (error, data) => {
+    const fileContents = fs.readFile(filepath, { encoding: 'utf-8' }, (error, data) => {
       expect(JSON.parse(data)).to.eql({config: { frontvue: {} }});
     });
-  });
+  }).timeout(12000);
 
 
   it('instantiates without Frontvue config object', async () => {
@@ -71,13 +84,13 @@ describe('PackageJsonConfigReader', () => {
     const fileContents = await fs.readFile(filepath, { encoding: 'utf-8' }, (error, data) => {
       expect(JSON.parse(data)).to.eql({config: { somePlugin: {}, frontvue: {} }});
     });
-  });
+  }).timeout(12000);
 
 
   it('instantiates with prior Frontvue config object', async () => {
     const filepath = path.join(testDir, priorConfiguredFile);
     const configReader = await PackageJsonConfigReader('frontvue', filepath);
-    expect(await configReader.fetch()).to.eql({ key: 'value' });
+    return expect(configReader.fetch()).to.eventually.eql({ key: 'value' });
   });
 
 
@@ -85,7 +98,7 @@ describe('PackageJsonConfigReader', () => {
     const filepath = path.join(testDir, noConfigFile);
     const configReader = await PackageJsonConfigReader('frontvue', filepath);
     const updated = await configReader.update({ key: 'value' });
-    expect(await configReader.fetch()).to.eql({ key: 'value' });
+    return expect(configReader.fetch()).to.eventually.eql({ key: 'value' });
   });
 
 
@@ -97,5 +110,55 @@ describe('PackageJsonConfigReader', () => {
   });
 
 
-  afterEach(mockfs.restore);
+  it('accepts custom logger', () => {
+    const filepath = path.join(testDir, priorConfiguredFile);
+    return expect(
+      PackageJsonConfigReader('frontvue', filepath, Logger('frontvue')('customLogger')),
+    ).to.eventually.not.throw;
+  }).timeout(12000);
+
+
+  it('rejects promise if filepath config file can\'t be read', () => {
+    return expect(PackageJsonConfigReader('frontvue', path.join(testDir, nonExistingFile)))
+      .to.be.rejectedWith(RegExp(ERRORS.RW_ERROR));
+  }).timeout(12000);
+
+
+  it('rejects promise if refetching config from file fails', async () => {
+    const filepath = path.join(testDir, priorConfiguredFile);
+    const configReader = await PackageJsonConfigReader('frontvue', filepath);
+    // We destroy the mocked fs and replace the file with something that can't be read
+    mockfs.restore();
+    mockfs({
+      [testDir]: {
+        [priorConfiguredFile]: '',
+      },
+    });
+    return expect(configReader.fetch()).to.be.rejectedWith(RegExp(ERRORS.RW_ERROR));
+  }).timeout(12000);
+
+
+  it('rejects promise if destroy fails after initial config file fetch', async () => {
+    const filepath = path.join(testDir, priorConfiguredFile);
+    const configReader = await PackageJsonConfigReader('frontvue', filepath);
+    // We destroy the mocked fs and recreate the file with something that can't be read
+    mockfs.restore();
+    mockfs({
+      [testDir]: {
+        [priorConfiguredFile]: mockfs.file({
+          content: 'File content',
+          mode: 0o330,
+        }),
+      },
+    });
+
+    return expect(configReader.destroy()).to.be.rejectedWith(RegExp(ERRORS.RW_ERROR));
+  });
+
+
+  it('rejects promise if trying to destroy from readonly file', async () => {
+    const filepath = path.join(testDir, readonlyConfigFile);
+    const configReader = await PackageJsonConfigReader('frontvue', filepath);
+    return expect(configReader.destroy()).to.be.rejectedWith(Error);
+  }).timeout(12000);
 });
