@@ -5,6 +5,7 @@
  * @since 0.1.0
  */
 
+import Logger, { ILogger } from '../util/logger';
 import PackageJsonConfigReader, {
   Config,
   ConfigReader,
@@ -15,10 +16,14 @@ import PackageJsonConfigReader, {
 export interface IConfigManager {
   has(key: string): Promise<boolean>;
   get(key?: string): Promise<Config | any>;
-  set(option: Config | string, value?: any): Promise<boolean>;
-  remove(...options: string[]): Promise<boolean>;
+  set(option: Config | string, value?: any): Promise<boolean|Error>;
+  remove(...options: string[]): Promise<boolean|Error>;
+  errorHandler?(error?: Error): Error;
 }
 
+export const ERRORS = {
+  CONFIG_FETCH_FAILED: 'There was an error while accessing the configuration:',
+};
 
 /**
  * Configuration manager constructor
@@ -27,22 +32,47 @@ export interface IConfigManager {
  * @param customReader Custom ConfigReader
  */
 async function ConfigManager(
-  namespace: string,
+  namespace: string = 'frontvue',
   customReader?: ConfigReaderConstructor,
+  logger: ILogger = Logger('frontvue')('ConfigManager'),
 ): Promise<IConfigManager> {
   let configReader: ConfigReader;
 
-  // Check for custom config reader
-  if (customReader && typeof customReader === 'function') {
-    // Initialize custom config reader
-    configReader = customReader(namespace);
-  } else {
-    // If not, stick with the default config reader
-    configReader = await PackageJsonConfigReader(namespace);
+  // Instantiate configReader
+  try {
+    // Check for custom config reader
+    if (customReader && typeof customReader === 'function') {
+      // Initialize custom config reader
+      // Wrap customReader with a promise to handle this asynchronous
+      configReader = await Promise.resolve(customReader(namespace));
+    } else {
+      // If not, stick with the default config reader
+      configReader = await PackageJsonConfigReader(namespace);
+    }
+  } catch (error) {
+    return Promise.reject(errorHandler(error));
   }
 
-  // Get the configuration contents
-  let config: Config = await configReader.fetch();
+
+  // Catch any errors when fetching configuration object
+  let config: Config;
+  try {
+    // Get the configuration contents
+    config = await configReader.fetch();
+  } catch (error) {
+    return Promise.reject(errorHandler(error));
+  }
+
+
+  /**
+   * Error handler function
+   * @param error Caught error
+   */
+  function errorHandler(error?: Error): Error {
+    const errorMessage = error ? `\n  ${error.message}` : '';
+    logger.fatal(`${ERRORS.CONFIG_FETCH_FAILED} ${errorMessage}`);
+    return new Error(ERRORS.CONFIG_FETCH_FAILED);
+  }
 
 
   /**
@@ -75,7 +105,7 @@ async function ConfigManager(
    * @param option Configuration object or object key
    * @param value New value to be set if option is an object key ("string")
    */
-  async function set(option: Config | string, value?: any): Promise<boolean> {
+  async function set(option: Config | string, value?: any): Promise<boolean|Error> {
     // If we're passing in a "key" and a "value"
     if (typeof option === 'string' && typeof value !== 'undefined') {
       config[option] = value;
@@ -86,8 +116,13 @@ async function ConfigManager(
       return false;
     }
 
-    const saved: boolean = await configReader.update(config);
-    return saved;
+    try {
+      const saved: boolean | Error = await configReader.update(config);
+      return saved;
+    } catch (error) {
+      return Promise.reject(errorHandler(error));
+    }
+
   }
 
 
@@ -95,20 +130,34 @@ async function ConfigManager(
    * Removes one or more options from config
    * @param option Option name or array of option names
    */
-  async function remove(...options: string[]): Promise<boolean> {
+  async function remove(...options: string[]): Promise<boolean|Error> {
     options.forEach(item => delete config[item]);
-    const saved: boolean = await configReader.update(config);
-    return saved;
+    try {
+      const saved: boolean | Error = await configReader.update(config);
+      return saved;
+    } catch (error) {
+      return Promise.reject(errorHandler(error));
+    }
   }
 
-
-  // Returning config manager public API
-  return Object.freeze({
+  // Creating the public API object
+  let publicApi: IConfigManager = {
     get,
     has,
     remove,
     set,
-  });
+  };
+
+  // Adding private methods to public API in test environment
+  /* test:start */
+  publicApi = {...publicApi,
+    errorHandler,
+  };
+  /* test:end */
+
+
+  // Returning config manager public API
+  return Object.freeze(publicApi);
 }
 
 export default ConfigManager;
