@@ -42,7 +42,7 @@ interface LogColors {
 }
 
 const LogColors: LogColors = {
-  debug: '#0074D9',
+  debug: '#EE82EE',
   error: '#FF4136',
   fatal: '#C10000',
   info: '#39CCCC',
@@ -78,7 +78,7 @@ function Logger(namespace: string): (channel?: string) => ILogger {
       return undefined;
     }
     const channel = chalk.hex(LogColors.debug).bold(`@${this.channel}`);
-    console.log(fancyDecoration(), channel, ...args);
+    console.log(`  ${fancyDecoration()}`, channel, ...args);
   }
 
 
@@ -146,10 +146,10 @@ function Logger(namespace: string): (channel?: string) => ILogger {
     const cNamespace = chalk.hex('#7AC0DA').bold(`\u15D6 ${namespace}`);
     const cLevel = chalk.bgHex(LogColors[LogLevel[level]])(` ${LogLevel[level].toUpperCase()} `);
     const cChannel = channel
-      ? chalk.hex('#EE82EE').bold(`@${channel} `)
+      ? chalk.hex('#EE82EE').bold(`@${channel}:`)
       : '';
 
-    return `${cNamespace} ${cLevel}  ${cChannel}`;
+    return `${cNamespace} ${cLevel} ${cChannel}`;
   }
 
 
