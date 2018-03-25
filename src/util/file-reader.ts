@@ -6,18 +6,20 @@
  */
 
 import * as fs from 'fs';
+import { Config } from '../config-manager/package-json-config-reader';
 
 interface FileReader {
   read(): Promise<any>;
-  write(object: object): Promise<boolean>;
+  write(object: object): Promise<boolean|Error>;
 }
 
 export const ERRORS = {
-  NOT_FOUND: `File not found`,
+  NOT_FOUND: `FileReader> File not found`,
+  NOT_JSON: `FileReader> File is not in a JSON-like format`,
   PATH_NOT_PASSED: `FileReader requires 1 parameter to be string <filepath>`,
   PATH_NOT_STRING: `FileReader requires parameter 1 to be string`,
-  READ_ERROR: `Could not read file`,
-  WRITE_ERROR: `Could not write file`,
+  READ_ERROR: `FileReader> Could not read file`,
+  WRITE_ERROR: `FileReader> Could not write file`,
 };
 
 /**
@@ -39,14 +41,22 @@ function FileReader(filepath: string): FileReader {
   /**
    * Get file contents
    */
-  function read(): Promise<any> {
-    return new Promise(resolve => {
+  function read(): Promise<boolean|Error> {
+    return new Promise((resolve, reject) => {
       fs.readFile(filepath, 'utf-8', (readError, data) => {
-        try {
-          resolve(JSON.parse(data));
-        } catch (parseError) {
-          resolve(false);
+        // Throw back any read errors
+        if (readError) {
+          return reject(new Error(`${ERRORS.READ_ERROR}: ${readError.message}`));
         }
+
+        let parsedJson;
+        try {
+          parsedJson = JSON.parse(data);
+        } catch (parseError) {
+          return reject(new Error(ERRORS.NOT_JSON));
+        }
+
+        return resolve(parsedJson);
       });
     });
   }
@@ -56,18 +66,21 @@ function FileReader(filepath: string): FileReader {
    * Write JSON object to file
    * @param object Object literal
    */
-  function write(object: object): Promise<boolean> {
+  function write(object: Config): Promise<boolean|Error> {
     return new Promise((resolve, reject) => {
+      // TODO: replace 2 with 'detect-indent' module's output
       const content = JSON.stringify(object, null, 2);
-      fs.writeFile(filepath, content, error => {
-        if (error) {
-          return resolve(false);
+      // Write the file content with an empty line at the end
+      fs.writeFile(filepath, `${content}\n`, writeError => {
+        if (writeError) {
+          return reject(new Error(`${ERRORS.WRITE_ERROR}: ${writeError.message}`));
         }
 
         return resolve(true);
       });
     });
   }
+
 
   // Return public API
   return Object.freeze({
