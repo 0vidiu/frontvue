@@ -153,7 +153,7 @@ describe('PackageJsonConfigReader', () => {
     });
 
     return expect(configReader.destroy()).to.be.rejectedWith(RegExp(ERRORS.RW_ERROR));
-  });
+  }).timeout(12000);
 
 
   it('rejects promise if trying to destroy from readonly file', async () => {
