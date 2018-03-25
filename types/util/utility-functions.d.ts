@@ -1,19 +1,19 @@
-/**
- * Name: utility-functions.ts
- * Description: Custom collection of utility functions
- * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
- */
 export interface NestedObject {
     [key: string]: any;
 }
 export declare type AnyFunction = (...args: any[]) => any;
 export declare const ERRORS: {
+    HAS_NESTED_NOT_AN_OBJECT: string;
+    HAS_NESTED_NOT_A_STRING: string;
     LIMIT_NOT_A_NUMBER: string;
     NOT_A_FUNCTION: string;
     RANGE_LIMITS_EQUAL: string;
     RANGE_NEEDS_NUMBERS: string;
     RANGE_NEEDS_TWO_PARAMS: string;
+    RETRY_DELAY_CANNOT_BE_ZERO: string;
+    RETRY_NEEDS_A_FUNCTION: string;
+    RETRY_NEEDS_OPTIONS_TO_BE_OBJECT: string;
+    RETRY_RETRIES_CANNOT_BE_ZERO: string;
 };
 /**
  * Check object for path
@@ -33,3 +33,25 @@ export declare function limitFn(fn: AnyFunction | void, limit?: number): AnyFunc
  * @param to End number
  */
 export declare function range(from: number, to: number): number[];
+/**
+ * Resolves a promise after a custom amount of time
+ * @param ms Number of miliseconds to sleep
+ */
+export declare function sleep(ms?: number): Promise<void>;
+/**
+ * Get function name
+ */
+export declare function getFnName(fn: AnyFunction): string;
+/**
+ * Takes a function and calls it, when and if it fails,
+ * it retries until it reaches max number of retries
+ * @param fn Function to be called
+ * @param options Options object
+ * @return Function's return value or last error
+ */
+export declare function retry(fn: AnyFunction, options?: {
+    delay?: number;
+    retries?: number;
+    logChannel?: string;
+    logNamespace?: string;
+}): Promise<any>;

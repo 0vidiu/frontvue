@@ -1,9 +1,10 @@
 interface FileReader {
     read(): Promise<any>;
-    write(object: object): Promise<boolean>;
+    write(object: object): Promise<boolean | Error>;
 }
 export declare const ERRORS: {
     NOT_FOUND: string;
+    NOT_JSON: string;
     PATH_NOT_PASSED: string;
     PATH_NOT_STRING: string;
     READ_ERROR: string;
