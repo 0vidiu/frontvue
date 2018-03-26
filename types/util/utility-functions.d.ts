@@ -15,6 +15,8 @@ export declare const ERRORS: {
     RETRY_NEEDS_OPTIONS_TO_BE_OBJECT: string;
     RETRY_RETRIES_CANNOT_BE_ZERO: string;
     REQUIRED_NEEDS_MESSAGE: string;
+    HAS_ALL_KEYS_NEEDS_KEYS_ARRAY: string;
+    HAS_ALL_KEYS_NEEDS_OBJECT: string;
 };
 /**
  * Check object for path
@@ -64,3 +66,11 @@ export declare function retry(fn: AnyFunction, options?: {
  * @param message Custom error message
  */
 export declare function required<T>(message: string): T;
+/**
+ * Check if passed object as all the keys in the keys array
+ * @param object Object to be tested
+ * @param keys Array of keys
+ */
+export declare function hasAllKeys(object?: ({
+    [key: string]: any;
+}), ...keys: string[]): boolean;

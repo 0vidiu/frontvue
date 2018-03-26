@@ -36,6 +36,10 @@ export const ERRORS = {
 
   // required()
   REQUIRED_NEEDS_MESSAGE: 'required() requires first argument <message> of type \'string\'',
+
+  // hasAllKeys()
+  HAS_ALL_KEYS_NEEDS_KEYS_ARRAY: 'hasAllKeys() requires rest argument(s) <key> of type \'string\'',
+  HAS_ALL_KEYS_NEEDS_OBJECT: 'hasAllKeys() requires first argument <object> of type \'object\'',
 };
 
 
@@ -264,4 +268,23 @@ export function required<T>(message: string): T {
   }
 
   throw new Error(message);
+}
+
+
+/**
+ * Check if passed object as all the keys in the keys array
+ * @param object Object to be tested
+ * @param keys Array of keys
+ */
+export function hasAllKeys(
+  object: ({[key: string]: any}) = required(ERRORS.HAS_ALL_KEYS_NEEDS_OBJECT),
+  ...keys: string[],
+): boolean {
+  if (typeof object !== 'object') {
+    return required(ERRORS.HAS_ALL_KEYS_NEEDS_OBJECT);
+  } else if (keys.length === 0 || !keys.every(item => typeof item === 'string')) {
+    return required(ERRORS.HAS_ALL_KEYS_NEEDS_KEYS_ARRAY);
+  }
+
+  return keys.every(key => hasNested(object, key));
 }

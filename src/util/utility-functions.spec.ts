@@ -14,6 +14,7 @@ import {
   required,
   retry,
   sleep,
+  hasAllKeys,
 } from './utility-functions';
 
 describe('Utility Functions', () => {
@@ -343,6 +344,44 @@ describe('Utility Functions', () => {
 
     it('throws when called with non-string <message> parameter', () => {
       assert.throws(() => required(1), ERRORS.REQUIRED_NEEDS_MESSAGE);
+    });
+  });
+
+
+  describe('hasAllKeys()', () => {
+    const subject = {
+      keyA: 'valueA',
+      keyB: 'valueB',
+      keyC: 'valueC',
+    };
+
+    it('returns true if object contains all keys', () => {
+      expect(hasAllKeys(subject, 'keyA', 'keyB', 'keyC')).to.be.true;
+    });
+
+
+    it('returns false if object doesn\'t contain all keys', () => {
+      expect(hasAllKeys(subject, 'keyA', 'keyB', 'keyC', 'keyD')).to.be.false;
+    });
+
+
+    it('throws if called without parameters', () => {
+      assert.throws(() => hasAllKeys(), ERRORS.HAS_ALL_KEYS_NEEDS_OBJECT);
+    });
+
+
+    it('throws if first parameter is not an object', () => {
+      assert.throws(() => hasAllKeys(false), ERRORS.HAS_ALL_KEYS_NEEDS_OBJECT);
+    });
+
+
+    it('throws if rest params are not passed', () => {
+      assert.throws(() => hasAllKeys(subject), ERRORS.HAS_ALL_KEYS_NEEDS_KEYS_ARRAY);
+    });
+
+
+    it('throws if rest params are not strings', () => {
+      assert.throws(() => hasAllKeys(subject, 'keyA', 1, true), ERRORS.HAS_ALL_KEYS_NEEDS_KEYS_ARRAY);
     });
   });
 });
