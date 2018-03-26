@@ -5,7 +5,16 @@ chai.use(chaiAsPromised);
 import { assert, expect } from 'chai';
 import 'mocha';
 import { stdout } from 'test-console';
-import { ERRORS, getFnName, hasNested, limitFn, range, retry, sleep } from './utility-functions';
+import {
+  ERRORS,
+  getFnName,
+  hasNested,
+  limitFn,
+  range,
+  required,
+  retry,
+  sleep,
+} from './utility-functions';
 
 describe('Utility Functions', () => {
   describe('hasNested()', () => {
@@ -317,6 +326,23 @@ describe('Utility Functions', () => {
         await retry(alwaysErrorsFn, { logChannel: 'customChannel', retries: 1 }).catch(ignore => undefined);
         expect(inspect.output.join(' ')).to.have.string('customChannel');
       }).timeout(5000);
+    });
+  });
+
+
+  describe('required()', () => {
+    it('throws an error with custom message when called', () => {
+      assert.throws(() => required('My custom error message'), 'My custom error message');
+    });
+
+
+    it('throws when called without <message> parameter', () => {
+      assert.throws(() => required(), ERRORS.REQUIRED_NEEDS_MESSAGE);
+    });
+
+
+    it('throws when called with non-string <message> parameter', () => {
+      assert.throws(() => required(1), ERRORS.REQUIRED_NEEDS_MESSAGE);
     });
   });
 });

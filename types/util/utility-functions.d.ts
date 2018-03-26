@@ -14,6 +14,7 @@ export declare const ERRORS: {
     RETRY_NEEDS_A_FUNCTION: string;
     RETRY_NEEDS_OPTIONS_TO_BE_OBJECT: string;
     RETRY_RETRIES_CANNOT_BE_ZERO: string;
+    REQUIRED_NEEDS_MESSAGE: string;
 };
 /**
  * Check object for path
@@ -55,3 +56,11 @@ export declare function retry(fn: AnyFunction, options?: {
     logChannel?: string;
     logNamespace?: string;
 }): Promise<any>;
+/**
+ * Helper for function parameter validation
+ * This is useful for function parameter validation by assigning it as a default value
+ * If no value will be passed the function will be called automatically
+ * Usage: function foo(bar = required('<bar> is required')) { ... }
+ * @param message Custom error message
+ */
+export declare function required<T>(message: string): T;

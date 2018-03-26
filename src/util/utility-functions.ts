@@ -33,6 +33,9 @@ export const ERRORS = {
   RETRY_NEEDS_A_FUNCTION: 'retry() requires first argument <fn> to be of type \'function\'',
   RETRY_NEEDS_OPTIONS_TO_BE_OBJECT: 'retry() requires second argument <options> to be of type \'object\'',
   RETRY_RETRIES_CANNOT_BE_ZERO: 'retry() option <retries> cannot be 0',
+
+  // required()
+  REQUIRED_NEEDS_MESSAGE: 'required() requires first argument <message> of type \'string\'',
 };
 
 
@@ -245,4 +248,20 @@ export async function retry(
     // Finally, nothing seems to work, reject the promise with the last error
     return reject(errors[errors.length - 1]);
   });
+}
+
+
+/**
+ * Helper for function parameter validation
+ * This is useful for function parameter validation by assigning it as a default value
+ * If no value will be passed the function will be called automatically
+ * Usage: function foo(bar = required('<bar> is required')) { ... }
+ * @param message Custom error message
+ */
+export function required<T>(message: string): T {
+  if (typeof message === 'undefined' || typeof message !== 'string') {
+    throw new Error(ERRORS.REQUIRED_NEEDS_MESSAGE);
+  }
+
+  throw new Error(message);
 }
