@@ -8,10 +8,8 @@
 import FileReader from '../util/file-reader';
 import Logger, { ILogger } from '../util/logger';
 import { hasNested, retry } from '../util/utility-functions';
+import { Config } from './index';
 
-export interface Config {
-  [key: string]: any;
-}
 
 export interface ConfigReader {
   destroy(): Promise<Config|Error>;

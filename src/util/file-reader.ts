@@ -6,7 +6,7 @@
  */
 
 import * as fs from 'fs';
-import { Config } from '../config-manager/package-json-config-reader';
+import { Config } from '../config-manager';
 
 interface FileReader {
   read(): Promise<any>;

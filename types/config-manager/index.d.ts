@@ -5,7 +5,10 @@
  * @since 0.1.0
  */
 import { ILogger } from '../util/logger';
-import { Config, ConfigReaderConstructor } from './package-json-config-reader';
+import { ConfigReaderConstructor } from './package-json-config-reader';
+export interface Config {
+    [key: string]: any;
+}
 export interface IConfigManager {
     has(key: string): Promise<boolean>;
     get(key?: string): Promise<Config | any>;

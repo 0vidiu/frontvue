@@ -7,11 +7,14 @@
 
 import Logger, { ILogger } from '../util/logger';
 import PackageJsonConfigReader, {
-  Config,
   ConfigReader,
   ConfigReaderConstructor,
 } from './package-json-config-reader';
 
+
+export interface Config {
+  [key: string]: any;
+}
 
 export interface IConfigManager {
   has(key: string): Promise<boolean>;
@@ -122,7 +125,6 @@ async function ConfigManager(
     } catch (error) {
       return Promise.reject(errorHandler(error));
     }
-
   }
 
 

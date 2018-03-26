@@ -1,7 +1,5 @@
 import { ILogger } from '../util/logger';
-export interface Config {
-    [key: string]: any;
-}
+import { Config } from './index';
 export interface ConfigReader {
     destroy(): Promise<Config | Error>;
     fetch(): Promise<Config | Error>;
