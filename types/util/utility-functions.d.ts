@@ -74,3 +74,7 @@ export declare function required<T>(message: string): T;
 export declare function hasAllKeys(object?: ({
     [key: string]: any;
 }), ...keys: string[]): boolean;
+/**
+ * Create plugin namespace prefix
+ */
+export declare function pluginPrefix(namespace: string): string;

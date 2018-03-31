@@ -11,7 +11,7 @@ export interface Config {
 }
 export interface IConfigManager {
     has(key: string): Promise<boolean>;
-    get(key?: string): Promise<Config | any>;
+    get(key?: string | string[]): Promise<Config | any>;
     set(option: Config | string, value?: any): Promise<boolean | Error>;
     remove(...options: string[]): Promise<boolean | Error>;
     errorHandler?(error?: Error): Error;

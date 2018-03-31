@@ -1,17 +1,17 @@
 import { Config } from '../config-manager';
 import { ConfigQuestionnaire } from '../config-wizard';
-import { Task } from '../task-manager';
 import { ILogger } from '../util/logger';
 import { AnyFunction } from '../util/utility-functions';
-export interface InstallableTaskOptions {
-    task: AnyFunction;
+import { Plugin } from './index';
+export interface InstallableOptions {
+    taskFn: AnyFunction;
     hook: string;
     name: string;
     description?: string;
     configDefaults?: Config;
     configQuestionnaire?: ConfigQuestionnaire;
 }
-export interface TaskProvider {
+export interface PluginProvider {
     logger: ILogger;
 }
 export declare const ERRORS: {
@@ -21,11 +21,12 @@ export declare const ERRORS: {
 };
 /**
  * Task plugin constructor
+ * @param configDefaults Configuration defaults object
  * @param configQuestionnaire Configuration questionnaire object
  * @param description Task description
  * @param hook Task registration hook
  * @param name Task name
- * @param task Function to be called when running the task
+ * @param taskFn Function to be called when running the task
  */
-declare function InstallableTask({configDefaults, configQuestionnaire, description, hook, name, task}: InstallableTaskOptions): Task;
-export default InstallableTask;
+declare function Installable<T>(plugin: T): Plugin;
+export default Installable;

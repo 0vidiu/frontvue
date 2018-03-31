@@ -1,7 +1,8 @@
+import { QuestionnaireSubscriber } from '../config-wizard';
 export interface Task {
     name?: string;
     description?: string;
-    install(subscriber: TaskSubscriber): void;
+    install(subscriber: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
 }
 export interface Tasks {
     [key: string]: string[];
@@ -10,8 +11,8 @@ export interface TaskSubscriber {
     [hook: string]: (taskName: string) => string;
 }
 export interface TaskManager {
-    add(task: Task): void;
     run(hook: string): Promise<boolean>;
+    getSubscribers(): TaskSubscriber;
     hasTasks?(hook: string): boolean;
     getTasks?(): Tasks;
     getHooks?(): string[];
