@@ -288,3 +288,11 @@ export function hasAllKeys(
 
   return keys.every(key => hasNested(object, key));
 }
+
+
+/**
+ * Create plugin namespace prefix
+ */
+export function pluginPrefix(namespace: string): string {
+  return `plugin-${namespace}:`;
+}

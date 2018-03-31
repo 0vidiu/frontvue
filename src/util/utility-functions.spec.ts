@@ -8,13 +8,14 @@ import { stdout } from 'test-console';
 import {
   ERRORS,
   getFnName,
+  hasAllKeys,
   hasNested,
   limitFn,
+  pluginPrefix,
   range,
   required,
   retry,
   sleep,
-  hasAllKeys,
 } from './utility-functions';
 
 describe('Utility Functions', () => {
@@ -382,6 +383,13 @@ describe('Utility Functions', () => {
 
     it('throws if rest params are not strings', () => {
       assert.throws(() => hasAllKeys(subject, 'keyA', 1, true), ERRORS.HAS_ALL_KEYS_NEEDS_KEYS_ARRAY);
+    });
+  });
+
+
+  describe('pluginPrefix()', () => {
+    it('returns plugin prefix', () => {
+      expect(pluginPrefix('myplugin')).to.equal('plugin-myplugin:');
     });
   });
 });
