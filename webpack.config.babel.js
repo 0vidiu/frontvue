@@ -66,7 +66,10 @@ const configuration = {
   },
 
   externals: {
+    chalk: 'chalk',
+    commander: 'commander',
     gulp: 'gulp',
+    inquirer: 'inquirer',
   },
 
   optimization: {
