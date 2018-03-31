@@ -4,7 +4,8 @@ import * as path from 'path';
 import { stdout } from 'test-console';
 import Logger from '../util/logger';
 import ConfigManager, { ERRORS, IConfigManager } from './index';
-import { Config, ConfigReader } from './package-json-config-reader';
+import { Config } from './index';
+import { ConfigReader } from './package-json-config-reader';
 
 describe('ConfigManager', () => {
   let configManager: IConfigManager;
@@ -62,6 +63,39 @@ describe('ConfigManager', () => {
   });
 
 
+  it('gets the keys from the passed array', async () => {
+    await configManager.set({
+      'plugin:optionA': 'valueA',
+      'plugin:optionB': 'valueB',
+      'plugin:optionC': 'valueC',
+    });
+
+    const validKeys = ['plugin:optionA', 'plugin:optionB', 'plugin:optionC'];
+    expect(await configManager.get(validKeys))
+      .to.be.an('object')
+      .to.contain.keys(...validKeys);
+
+    await configManager.remove(...validKeys);
+  });
+
+
+  it('gets only the existing keys from passed array', async () => {
+    await configManager.set({
+      'plugin:optionA': 'valueA',
+      'plugin:optionB': 'valueB',
+      'plugin:optionC': 'valueC',
+    });
+
+    const validKeys = ['plugin:optionA', 'plugin:optionB', 'plugin:optionC'];
+    const mixedKeys = [...validKeys, 'plugin:optionD', 'plugin:optionE'];
+    expect(await configManager.get(mixedKeys))
+      .to.be.an('object')
+      .to.contain.keys(...validKeys);
+
+    await configManager.remove(...validKeys);
+  });
+
+
   it('sets an option', async () => {
     configManager.set('key', 'value');
     expect(await configManager.get('key')).to.equal('value');
@@ -78,7 +112,7 @@ describe('ConfigManager', () => {
   });
 
 
-  it('returns false if not called properly', async () => {
+  it('returns false if .set() is not called properly', async () => {
     expect(await configManager.set({})).to.be.false;
   });
 

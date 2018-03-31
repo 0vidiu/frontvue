@@ -18,7 +18,7 @@ export interface Config {
 
 export interface IConfigManager {
   has(key: string): Promise<boolean>;
-  get(key?: string): Promise<Config | any>;
+  get(key?: string | string[]): Promise<Config | any>;
   set(option: Config | string, value?: any): Promise<boolean|Error>;
   remove(...options: string[]): Promise<boolean|Error>;
   errorHandler?(error?: Error): Error;
@@ -92,13 +92,33 @@ async function ConfigManager(
    * Retrieve value from configuration
    * @param key Configuration option key
    */
-  async function get(key?: string): Promise<Config | any> {
+  async function get(key?: string | string[]): Promise<Config | any> {
     config = await configReader.fetch();
 
+    // If no key is specified, return the entire config object
     if (typeof key === 'undefined') {
       return config;
     }
 
+    // If an array is passed, return an object
+    // with the all the existing config keys from the array
+    if (Array.isArray(key)) {
+      // Assigning array to new variable so the naming makes sense
+      const keys = key;
+      // Create a new object with all available keys in the configuration
+      return keys.reduce((accumConfig, currKey) => {
+        // Check if configuration has provided key
+        if (typeof config[currKey] !== 'undefined') {
+          // Add the key value pair to the returning object
+          accumConfig = {...accumConfig,
+            ...{ [currKey]: config[currKey] },
+          };
+        }
+        return accumConfig;
+      }, {});
+    }
+
+    // Otherwise, return just the specified key
     return config[key];
   }
 
@@ -120,8 +140,7 @@ async function ConfigManager(
     }
 
     try {
-      const saved: boolean | Error = await configReader.update(config);
-      return saved;
+      return await configReader.update(config);
     } catch (error) {
       return Promise.reject(errorHandler(error));
     }
@@ -135,12 +154,12 @@ async function ConfigManager(
   async function remove(...options: string[]): Promise<boolean|Error> {
     options.forEach(item => delete config[item]);
     try {
-      const saved: boolean | Error = await configReader.update(config);
-      return saved;
+      return await configReader.update(config);
     } catch (error) {
       return Promise.reject(errorHandler(error));
     }
   }
+
 
   // Creating the public API object
   let publicApi: IConfigManager = {
