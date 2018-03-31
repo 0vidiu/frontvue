@@ -6,30 +6,53 @@
  */
 
 import * as gulp from 'gulp';
-import { Task } from '../task-manager';
-import PlugableTask from '../task-manager/plugable-task';
-import Logger from '../util/logger';
-import { AnyFunction } from '../util/utility-functions';
+import { PluginProvider } from '../plugin-manager/installable';
+import { AnyFunction, sleep } from '../util/utility-functions';
 
-const logger = Logger('frontvue')('init');
 
-// Task meta data
-const hook = 'init';
-const name = 'init-project';
-const description = 'Task for initializing a new project';
+// Configuration defaults
+const configDefaults = {
+  fullName: 'John Smith',
+  useDefault: true,
+};
+
+// Configuration wizard questions
+const questions = [
+  {
+    default: configDefaults.fullName,
+    message: 'Type in your full name',
+    name: 'fullName',
+    type: 'input',
+  },
+];
+
+// Object to be exported
+const taskExport = {
+  // configDefaults,
+  // configQuestionnaire: {
+  //   namespace: 'init',
+  //   questions,
+  // },
+  description: 'Task for initializing a new project',
+  hook: 'init',
+  name: 'init',
+  taskFn,
+};
 
 
 /**
  * Task main function
  * @param done Gulp async callback
  */
-function task(done?: AnyFunction): any {
-  logger.log(`Running Task: ${name}`);
+async function taskFn(done: AnyFunction, { logger }: PluginProvider): Promise<any> {
+  logger.debug('Something happening now...');
+  logger.debug('That something has been completed!');
   done && done();
 }
 
+
 /* test:start */
-export { task };
+export { taskFn };
 /* test:end */
 
-export default PlugableTask(task, hook, name, description);
+export default taskExport;
