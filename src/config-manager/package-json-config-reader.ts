@@ -133,7 +133,7 @@ async function PackageJsonConfigReader(
   /**
    * Fetch configuration object
    */
-  async function fetch(): Promise<Config> {
+  async function fetch(): Promise<Config|Error> {
     await refetchConfigFileContents();
     return Promise.resolve(packageJson.config[namespace]);
   }
