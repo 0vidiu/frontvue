@@ -28,7 +28,8 @@ ehthumbs.db
 Thumbs.db
 
 # Custom #
-###############
+##############
+.vscode
 .nyc_output
 coverage
 dist
