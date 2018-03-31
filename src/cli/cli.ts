@@ -23,7 +23,7 @@ program
       const instance = await frontvue;
       const logger = instance.logger('cli');
       logger.info(`Creating a new project ./${name}`);
-      instance.run('init');
+      await instance.run('init');
     })
     .description('Initialize a new project');
 
