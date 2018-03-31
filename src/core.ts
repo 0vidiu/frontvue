@@ -6,6 +6,7 @@
  */
 
 import ConfigManager from './config-manager';
+import ConfigWizard from './config-wizard';
 import PluginManager from './plugin-manager';
 import TaskManager from './task-manager';
 import taskInitProject from './tasks/task-init-project';
@@ -19,16 +20,17 @@ async function Frontvue() {
   const name = 'frontvue';
   const logger = Logger(name);
   const configManager = await ConfigManager(name);
+  const configWizard = ConfigWizard(configManager);
   const taskManager = TaskManager({
     hooks: [
       'init',
     ],
   });
-  const pluginManager = PluginManager(taskManager);
+  const pluginManager = PluginManager(taskManager, configWizard);
   const { run } = taskManager;
 
   // Use custom plugin
-  pluginManager.use(taskInitProject);
+  await pluginManager.use(taskInitProject);
 
   // Return public API
   return Object.freeze({
