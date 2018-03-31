@@ -28,7 +28,7 @@ describe('TaskManager', () => {
     const taskManager = TaskManager();
     expect(taskManager)
       .to.be.an('object')
-      .to.have.all.keys('add', 'run', 'hasTasks', 'getHooks', 'getTasks');
+      .to.have.all.keys('getSubscribers', 'run', 'hasTasks', 'getHooks', 'getTasks');
   });
 
 
@@ -53,15 +53,16 @@ describe('TaskManager', () => {
       },
     };
 
-    taskManager.add(task);
+    task.install(taskManager.getSubscribers());
   });
 
 
   it('subscribes task to hook', () => {
     const taskManager = TaskManager(options);
+    const subscribers = taskManager.getSubscribers();
     const task = makeTask('before');
 
-    taskManager.add(task);
+    task.install(subscribers);
 
     expect(taskManager.getTasks().before)
       .to.be.an('array')
@@ -69,20 +70,20 @@ describe('TaskManager', () => {
   });
 
 
-  it('returns true on task subscription', () => {
-    const taskManager = TaskManager(options);
+  it('returns true on task subscription', async () => {
     const task = {
-      install(subscriptions: TaskSubscriber) {
-        expect(subscriptions.before('before-task')).to.be.true;
+      install(subscribers: TaskSubscriber) {
+        expect(subscribers.before('before-task')).to.be.true;
       },
     };
-    taskManager.add(task);
+    const taskSubscribers = TaskManager(options).getSubscribers();
+    task.install(taskSubscribers);
   });
 
 
   it('returns true when task is run', async () => {
     const taskManager = TaskManager(options);
-    taskManager.add(makeTask('before'));
+    makeTask('before').install(taskManager.getSubscribers());
     expect(await taskManager.run('before')).to.be.true;
   });
 
@@ -95,7 +96,7 @@ describe('TaskManager', () => {
 
   it('returns true if specific hook has tasks', () => {
     const taskManager = TaskManager(options);
-    taskManager.add(makeTask('before'));
+    makeTask('before').install(taskManager.getSubscribers());
     expect(taskManager.hasTasks('before')).to.be.true;
   });
 
@@ -103,12 +104,6 @@ describe('TaskManager', () => {
   it('returns false if no tasks are found for specific hook', () => {
     const taskManager = TaskManager(options);
     expect(taskManager.hasTasks('before')).to.be.false;
-  });
-
-
-  it('throws when .add() doesn\'t receive appropriate task', () => {
-    const taskManager = TaskManager(options);
-    assert.throws(() => taskManager.add(undefined), ERRORS.BAD_TASK);
   });
 
 
@@ -125,8 +120,8 @@ describe('TaskManager', () => {
     };
 
     const taskManager = TaskManager(options);
-    taskManager.add(task1);
-    taskManager.add(task2);
+    task1.install(taskManager.getSubscribers());
+    task2.install(taskManager.getSubscribers());
   });
 
 
@@ -138,6 +133,6 @@ describe('TaskManager', () => {
       },
     };
     const taskManager = TaskManager(options);
-    taskManager.add(abusingTask);
+    abusingTask.install(taskManager.getSubscribers());
   });
 });

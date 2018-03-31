@@ -6,13 +6,14 @@
  */
 
 import * as gulp from 'gulp';
+import { QuestionnaireSubscriber } from '../config-wizard';
 import { hasNested, limitFn } from '../util/utility-functions';
 
 
 export interface Task {
   name?: string;
   description?: string;
-  install(subscriber: TaskSubscriber): void;
+  install(subscriber: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
 }
 
 export interface Tasks {
@@ -24,8 +25,8 @@ export interface TaskSubscriber {
 }
 
 export interface TaskManager {
-  add(task: Task): void;
   run(hook: string): Promise<boolean>;
+  getSubscribers(): TaskSubscriber;
   hasTasks?(hook: string): boolean;
   getTasks?(): Tasks;
   getHooks?(): string[];
@@ -52,23 +53,6 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
 
   if (options && hasNested(options, 'hooks')) {
     hooks = [...hooks, ...options.hooks];
-  }
-
-
-  /**
-   * Register new task
-   * @param task Task object
-   */
-  function add(task: Task): void {
-    if (
-      typeof task !== 'object' ||
-      !task.hasOwnProperty('install') ||
-      typeof task.install !== 'function'
-    ) {
-      throw new Error(ERRORS.BAD_TASK);
-    }
-
-    task.install(Object.freeze(createSubscriptions()));
   }
 
 
@@ -111,6 +95,14 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
       subscribers = { ...subscribers, ...subscriber };
       return subscribers;
     }, {});
+  }
+
+
+  /**
+   * Return task subscribers object
+   */
+  function getSubscribers(): TaskSubscriber {
+    return createSubscriptions();
   }
 
 
@@ -158,7 +150,7 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
 
   // Creating the public API object
   let publicApi: TaskManager = {
-    add,
+    getSubscribers,
     run,
   };
 
