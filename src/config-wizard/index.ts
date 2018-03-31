@@ -7,8 +7,9 @@
 
 import * as inquirer from 'inquirer';
 import { Config, IConfigManager } from '../config-manager';
+import ConfigPrefixer from '../config-manager/prefixer';
 import Logger, { ILogger } from '../util/logger';
-import { hasAllKeys, required } from '../util/utility-functions';
+import { AnyFunction, hasAllKeys, limitFn, pluginPrefix, required } from '../util/utility-functions';
 
 
 export interface ConfigQuestion {
@@ -31,13 +32,19 @@ export interface QuestionnaireAnswers {
   [key: string]: Config;
 }
 
+export type QuestionnaireSubscriber = (defaults: Config, questionnaire: ConfigQuestionnaire) => Promise<boolean|Error>;
+
 export interface IConfigWizard {
   /* test:start */
   getQuestionnaires?(): Questionnaires;
   startQuestionnaire?(namespace: string): Promise<Config>;
   validateQuestionnaire?(questionnaire: ConfigQuestionnaire): boolean;
+  isConfigured?(pluginName: string, defaults: Config): Promise<boolean>;
+  getConfiguration?(namespace: string, defaults: Config): Promise<Config>;
+  setConfiguration?(namespace: string, config: Config): Promise<boolean|Error>;
   /* test:end */
   addQuestionnaire(...items: ConfigQuestionnaire[]): boolean;
+  getSubscriber(): QuestionnaireSubscriber;
   start(): Config;
 }
 
@@ -169,6 +176,97 @@ function ConfigWizard(
 
 
   /**
+   * Check if options with prefix exist in the configuration
+   * @param namespace Plugin name
+   * @param defaults Configuration defaults object
+   */
+  async function isConfigured(namespace: string, defaults: Config): Promise<boolean> {
+    // Create instance of prefixer with plugin namespace
+    const prefixer = ConfigPrefixer(pluginPrefix(namespace));
+    // Get a prefixed config object
+    const pluginOptions: Config = prefixer.apply(defaults);
+
+    // Wait while checking if all plugin options are configured
+    const results: boolean[] = await Promise.all(
+      Object.keys(pluginOptions).map(async option => await configManager.has(option)),
+    );
+
+    // Return true if all options are configured
+    return results.every(optionConfigured => optionConfigured === true);
+  }
+
+
+  /**
+   * Get stored plugin configuration object
+   * @param namespace Plugin name
+   * @param defaults Configuration defaults object
+   */
+  async function getConfiguration(namespace: string, defaults: Config): Promise<Config> {
+    // Create instance of prefixer with plugin namespace
+    const prefixer = ConfigPrefixer(pluginPrefix(namespace));
+    // Get prefixer config object
+    const prefixedConfig: Config = prefixer.apply(defaults);
+    // Return the configuration object
+    return prefixer.remove(await configManager.get(Object.keys(prefixedConfig)));
+  }
+
+
+  /**
+   * Set questionnaire configuration
+   * @param namespace Plugin name
+   * @param config Configuration object
+   */
+  async function setConfiguration(namespace: string, config: Config): Promise<boolean|Error> {
+    // Create instance of prefixer with plugin namespace
+    const prefixer = ConfigPrefixer(pluginPrefix(namespace));
+    // Get a prefixed config object
+    const prefixedConfig: Config = prefixer.apply(config);
+    // Save the configuration object
+    return await configManager.set(prefixedConfig);
+  }
+
+
+  /**
+   * Returns a one-time use function for plugins
+   * to register configuration questionnaires
+   */
+  function getSubscriber(): QuestionnaireSubscriber {
+    const subscriber: QuestionnaireSubscriber = async function (
+      defaults: Config = {},
+      questionnaire: ConfigQuestionnaire,
+    ): Promise<boolean|Error> {
+      // Register the questionnaire
+      if (!addQuestionnaire(questionnaire)) {
+        // If the questionnaire was not added, return false
+        return false;
+      }
+
+      // Check if plugin is configured
+      // If it's partially configured or not configured at all, start the questionnaire
+      if (!await isConfigured(questionnaire.namespace, defaults)) {
+        // Get current configuration and merge with defaults
+        const currentAnswers = await getConfiguration(questionnaire.namespace, defaults);
+        const currentDefaults = { ...defaults, ...currentAnswers };
+
+        // Start questionnaire
+        const answers = await startQuestionnaire(questionnaire.namespace);
+
+        // Merge configuration defaults with answers from questionnaire
+        const newAnswers = { ...currentDefaults, ...answers };
+
+        console.log(JSON.stringify(newAnswers, null, 2));
+        return await setConfiguration(questionnaire.namespace, newAnswers);
+      }
+
+      return true;
+    };
+
+    // Limit the use of subscriber function to only one call
+    return limitFn(subscriber) as QuestionnaireSubscriber;
+  }
+
+
+  /**
    * Start a specific questionnaire
    * @param namespace Questionnaire namespace
    */
@@ -177,6 +275,7 @@ function ConfigWizard(
       throw new Error(ERRORS.QUESTIONNARE_NAMESPACE_DOESNT_EXIST);
     }
 
+    logger.info(`Configure '${namespace}'`);
     return inquirer.prompt(questionnaires[namespace]);
   }
 
@@ -213,13 +312,17 @@ function ConfigWizard(
   // Creating the public API object
   let publicApi: IConfigWizard = {
     addQuestionnaire,
+    getSubscriber,
     start,
   };
 
   // Adding private methods to public API in test environment
   /* test:start */
   publicApi = {...publicApi,
+    getConfiguration,
     getQuestionnaires,
+    isConfigured,
+    setConfiguration,
     startQuestionnaire,
     validateQuestionnaire,
   };
