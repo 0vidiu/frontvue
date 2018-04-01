@@ -5,6 +5,7 @@
  * @since 0.1.0
  */
 
+import * as detectIndent from 'detect-indent';
 import * as fs from 'fs';
 import { Config } from '../config-manager';
 
@@ -37,6 +38,10 @@ function FileReader(filepath: string): FileReader {
     throw new Error(ERRORS.PATH_NOT_STRING);
   }
 
+  // File indentation will be assigned at first read
+  let fileIndent: string;
+  const defaultIndent: string = '  ';
+
 
   /**
    * Get file contents
@@ -47,6 +52,10 @@ function FileReader(filepath: string): FileReader {
         // Throw back any read errors
         if (readError) {
           return reject(new Error(`${ERRORS.READ_ERROR}: ${readError.message}`));
+        }
+
+        if (typeof fileIndent === 'undefined') {
+          fileIndent = detectIndent(data).indent || defaultIndent;
         }
 
         let parsedJson;
@@ -68,8 +77,7 @@ function FileReader(filepath: string): FileReader {
    */
   function write(object: Config): Promise<boolean|Error> {
     return new Promise((resolve, reject) => {
-      // TODO: replace 2 with 'detect-indent' module's output
-      const content = JSON.stringify(object, null, 2);
+      const content = JSON.stringify(object, null, fileIndent);
       // Write the file content with an empty line at the end
       fs.writeFile(filepath, `${content}\n`, writeError => {
         if (writeError) {

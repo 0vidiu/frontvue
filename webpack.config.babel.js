@@ -70,6 +70,7 @@ const configuration = {
     commander: 'commander',
     gulp: 'gulp',
     inquirer: 'inquirer',
+    'detect-indent': 'detect-indent',
   },
 
   optimization: {
