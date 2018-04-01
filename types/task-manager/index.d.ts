@@ -1,9 +1,3 @@
-import { QuestionnaireSubscriber } from '../config-wizard';
-export interface Task {
-    name?: string;
-    description?: string;
-    install(subscriber: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
-}
 export interface Tasks {
     [key: string]: string[];
 }
@@ -20,9 +14,6 @@ export interface TaskManager {
 export interface TaskManagerOptions {
     [key: string]: any;
 }
-export declare const ERRORS: {
-    BAD_TASK: string;
-};
 /**
  * Create TaskManager
  * @param options TaskManager options object

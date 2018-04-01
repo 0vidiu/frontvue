@@ -17,7 +17,9 @@ export interface PluginProvider {
 export declare const ERRORS: {
     FUNC_INVALID: string;
     HOOK_INVALID: string;
+    MISSING_NAME: string;
     NAME_INVALID: string;
+    NOT_AN_OBJECT: string;
 };
 /**
  * Validate plugin
@@ -25,7 +27,7 @@ export declare const ERRORS: {
  */
 export declare function isInstallable(object: {
     [key: string]: any;
-}): boolean;
+}): boolean | void;
 /**
  * Create utilities provider
  * @param name Plugin name

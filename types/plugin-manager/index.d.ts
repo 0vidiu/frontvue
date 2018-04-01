@@ -6,16 +6,18 @@
  */
 import { IConfigWizard, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskManager, TaskSubscriber } from '../task-manager';
+import { ILogger } from '../util/logger';
 import { InstallableObject } from './installable';
 export interface Plugin {
     name: string;
     description?: string;
-    install(taskSubscribers: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
+    install(...subscribers: PluginSubscribers[]): Promise<void>;
 }
 export interface PluginManager {
     use(plugin: Plugin | InstallableObject): Promise<void>;
     validate?(plugin: Plugin): boolean;
 }
+export declare type PluginSubscribers = TaskSubscriber | QuestionnaireSubscriber;
 export declare const ERRORS: {
     NO_CONFIG_WIZARD: string;
     NO_TASK_MANAGER: string;
@@ -23,5 +25,5 @@ export declare const ERRORS: {
 /**
  * PluginManager constructor
  */
-declare function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): PluginManager;
+declare function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard, logger?: ILogger): PluginManager;
 export default PluginManager;
