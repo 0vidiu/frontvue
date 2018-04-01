@@ -122,10 +122,10 @@ describe('Installable', () => {
     });
 
 
-    it('returns false if passed object not an installable plugin', () => {
+    it('throws if passed object is not an installable plugin', () => {
       expect(isInstallable({ taskFn, hook, name, description })).to.be.false;
       expect(isInstallable({})).to.be.false;
-      expect(isInstallable(undefined)).to.be.false;
+      assert.throws(() => isInstallable(undefined), ERRORS.NOT_AN_OBJECT);
     });
 
 
@@ -139,8 +139,8 @@ describe('Installable', () => {
     });
 
 
-    it('returns false if passed object doesn\'t have the name property', () => {
-      expect(isInstallable({ install: () => true })).to.be.false;
+    it('throws if passed object doesn\'t have the name property', () => {
+      assert.throws(() => isInstallable({ install: () => true }), ERRORS.MISSING_NAME);
     });
   });
 

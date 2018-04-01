@@ -32,7 +32,9 @@ export interface PluginProvider {
 export const ERRORS = {
   FUNC_INVALID: 'Installable() requires object member <taskFn> to be a function',
   HOOK_INVALID: 'Installable() requires object member <hook> to be a string',
+  MISSING_NAME: 'Installable> plugin is installable, but object member <name> of type string, is missing',
   NAME_INVALID: 'Installable() requires object member <name> to be a non-empty string',
+  NOT_AN_OBJECT: 'Installable() requires first parameter to be an object',
 };
 
 
@@ -40,11 +42,24 @@ export const ERRORS = {
  * Validate plugin
  * @param object Plugin object to be tested
  */
-export function isInstallable(object: {[key: string]: any}): boolean {
-  return typeof object === 'object' &&
-    object.hasOwnProperty('name') &&
-    object.hasOwnProperty('install') &&
-    typeof object.install === 'function';
+export function isInstallable(object: {[key: string]: any}): boolean | void {
+  if (typeof object !== 'object') {
+    throw new Error(ERRORS.NOT_AN_OBJECT);
+  }
+
+  // If it has the .install() method
+  if (object.hasOwnProperty('install') && typeof object.install === 'function') {
+    // And the name property, return true
+    if (object.hasOwnProperty('name')) {
+      return true;
+    }
+    // No name, throw an error
+    throw new Error(ERRORS.MISSING_NAME);
+  // If it doesn't have the .install() method
+  // It's not an installable plugin
+  } else {
+    return false;
+  }
 }
 
 
