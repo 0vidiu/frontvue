@@ -3,14 +3,17 @@ import 'mocha';
 import ConfigManager from '../config-manager';
 import ConfigWizard from '../config-wizard';
 import TaskManager from '../task-manager';
+import Logger from '../util/logger';
 import PluginManager, { ERRORS } from './index';
 
 describe('PluginManager', () => {
+  let logger;
   let taskManager;
   let configWizard;
   let validPlugin;
 
   beforeEach(async () => {
+    logger = Logger('frontvue')('PluginManager');
     taskManager = TaskManager({
       hooks: ['before', 'midway', 'after'],
     });
@@ -20,7 +23,7 @@ describe('PluginManager', () => {
 
 
   it('instantiates', () => {
-    const pluginManager = PluginManager(taskManager, configWizard);
+    const pluginManager = PluginManager(taskManager, configWizard, logger);
     expect(pluginManager).to.be.an('object')
       .to.contain.keys('use');
   });
@@ -40,7 +43,7 @@ describe('PluginManager', () => {
   });
 
 
-  it('calls taskManager.getSubscribers() method if plugin is valid', () => {
+  it('calls taskManager.getSubscribers() method if plugin is valid', async () => {
     let called = false;
 
     const taskManagerStub = {
@@ -49,27 +52,27 @@ describe('PluginManager', () => {
       run: () => undefined,
     };
     const pluginManager = PluginManager(taskManagerStub, configWizard);
-    pluginManager.use(validPlugin);
+    await pluginManager.use(validPlugin);
     expect(called).to.be.true;
   });
 
 
-  it('calls configWizard.getSubscriber() method if plugin is valid', () => {
+  it('calls configWizard.getSubscriber() method if plugin is valid', async () => {
     let called = false;
 
-    const configManagerStub = {
+    const configWizardStub = {
       addQuestionnaire: () => undefined,
       getSubscriber: () => called = true,
       start: () => undefined,
     };
 
-    const pluginManager = PluginManager(taskManager, configManagerStub);
-    pluginManager.use(validPlugin);
+    const pluginManager = PluginManager(taskManager, configWizardStub);
+    await pluginManager.use(validPlugin);
     expect(called).to.be.true;
   });
 
 
-  it('passes taskSubscribers and configSubscriber arguments to plugin.install() method', () => {
+  it('passes taskSubscribers and configSubscriber arguments to plugin.install() method', async () => {
     const pluginStub = {
       install(taskSubscribers, configSubscriber) {
         expect(taskSubscribers)
@@ -81,6 +84,6 @@ describe('PluginManager', () => {
     };
 
     const pluginManager = PluginManager(taskManager, configWizard);
-    pluginManager.use(pluginStub);
+    await pluginManager.use(pluginStub);
   });
 });

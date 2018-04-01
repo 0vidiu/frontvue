@@ -7,18 +7,21 @@
 
 import { IConfigWizard, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskManager, TaskSubscriber } from '../task-manager';
+import Logger, { ILogger } from '../util/logger';
 import Installable, { InstallableObject } from './installable';
 
 export interface Plugin {
   name: string;
   description?: string;
-  install(taskSubscribers: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
+  install(...subscribers: PluginSubscribers[]): Promise<void>;
 }
 
 export interface PluginManager {
   use(plugin: Plugin | InstallableObject): Promise<void>;
   validate?(plugin: Plugin): boolean;
 }
+
+export type PluginSubscribers = TaskSubscriber | QuestionnaireSubscriber;
 
 
 // Custom error messages
@@ -31,7 +34,11 @@ export const ERRORS = {
 /**
  * PluginManager constructor
  */
-function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): PluginManager {
+function PluginManager(
+  taskManager: TaskManager,
+  configWizard: IConfigWizard,
+  logger: ILogger = Logger('frontvue')('PluginManager'),
+): PluginManager {
   if (
     typeof taskManager === 'undefined' ||
     typeof taskManager !== 'object' ||
@@ -50,6 +57,19 @@ function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): P
 
 
   /**
+   * Provides an array of plugin subscribers
+   */
+  function getPluginSubscribers(): PluginSubscribers[] {
+    return [
+      // Subscriber for task hooks registration
+      taskManager.getSubscribers(),
+      // Subscriber for configuration questionnaire registration
+      configWizard.getSubscriber(),
+    ];
+  }
+
+
+  /**
    * Register plugin
    * @param plugin Plugin object
    */
@@ -57,19 +77,13 @@ function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): P
     // TODO: Add support for plugin as string
     // TODO: When plugin is of type string, look for plugin in node_modules
 
-    // Get task subscribers
-    const taskSubscribers: TaskSubscriber = taskManager.getSubscribers();
-    // Get config wizard questionnaire subscriber
-    const configSubscriber: QuestionnaireSubscriber = configWizard.getSubscriber();
+    const subscribers: PluginSubscribers[] = getPluginSubscribers();
 
-    await Installable(plugin)
-      .install(
-        // Provide the plugin with the following:
-        // Subscribers object for task hook subscription
-        taskSubscribers,
-        // Config Wizard questionnaire registrar
-        configSubscriber,
-      );
+    try {
+      await Installable(plugin).install(...subscribers);
+    } catch (error) {
+      logger.error(error.message);
+    }
   }
 
 
