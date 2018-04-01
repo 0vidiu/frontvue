@@ -10,12 +10,6 @@ import { QuestionnaireSubscriber } from '../config-wizard';
 import { hasNested, limitFn } from '../util/utility-functions';
 
 
-export interface Task {
-  name?: string;
-  description?: string;
-  install(subscriber: TaskSubscriber, configSubscriber: QuestionnaireSubscriber): Promise<void>;
-}
-
 export interface Tasks {
   [key: string]: string[];
 }
@@ -35,12 +29,6 @@ export interface TaskManager {
 export interface TaskManagerOptions {
   [key: string]: any;
 }
-
-
-// Custom error messages
-export const ERRORS = {
-  BAD_TASK: 'Passed task does not have the required .install() method',
-};
 
 
 /**
