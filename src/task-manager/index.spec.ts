@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai';
 import * as gulp from 'gulp';
 import 'mocha';
-import TaskManager, { ERRORS, TaskSubscriber } from './index';
+import TaskManager, { TaskSubscriber } from './index';
 
 
 // Helper: create custom hook task
@@ -28,7 +28,7 @@ describe('TaskManager', () => {
     const taskManager = TaskManager();
     expect(taskManager)
       .to.be.an('object')
-      .to.have.all.keys('getSubscribers', 'run', 'hasTasks', 'getHooks', 'getTasks');
+      .to.have.all.keys('getSubscribers', 'run', 'hasTasks', 'getHooks', 'getTasks', 'subscribe');
   });
 
 

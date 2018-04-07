@@ -7,6 +7,7 @@
 
 import * as gulp from 'gulp';
 import { QuestionnaireSubscriber } from '../config-wizard';
+import Logger, { ILogger } from '../util/logger';
 import { hasNested, limitFn } from '../util/utility-functions';
 
 
@@ -21,9 +22,12 @@ export interface TaskSubscriber {
 export interface TaskManager {
   run(hook: string): Promise<boolean>;
   getSubscribers(): TaskSubscriber;
+  /* test:start */
+  subscribe?(task: string, hook: string): boolean;
   hasTasks?(hook: string): boolean;
   getTasks?(): Tasks;
   getHooks?(): string[];
+  /* test:end */
 }
 
 export interface TaskManagerOptions {
@@ -38,6 +42,7 @@ export interface TaskManagerOptions {
 function TaskManager(options?: TaskManagerOptions): TaskManager {
   let hooks: string[] = [];
   const tasks: Tasks = {};
+  const logger: ILogger = Logger('frontvue')('TaskManager');
 
   if (options && hasNested(options, 'hooks')) {
     hooks = [...hooks, ...options.hooks];
@@ -57,8 +62,7 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
         return resolve(true);
       }
 
-      // TODO: Log out error message using custom logger
-      console.log(`>>> hook ${hook} doesn't exist or doesn't have any tasks`);
+      logger.warn(`<${hook}> hook doesn't exist or has no tasks`);
       return resolve(false);
     });
   }
@@ -94,6 +98,11 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
   }
 
 
+  /**
+   * Subscribe a task to a hook
+   * @param task Task name
+   * @param hook Hook name
+   */
   function subscribe(task: string, hook: string): boolean {
     // Create new array for hook, if not available
     if (!hasNested(tasks, hook)) {
@@ -149,6 +158,7 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
     getHooks,
     getTasks,
     hasTasks,
+    subscribe,
   };
   /* test:end */
 
