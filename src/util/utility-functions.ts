@@ -40,6 +40,10 @@ export const ERRORS = {
   // hasAllKeys()
   HAS_ALL_KEYS_NEEDS_KEYS_ARRAY: 'hasAllKeys() requires rest argument(s) <key> of type \'string\'',
   HAS_ALL_KEYS_NEEDS_OBJECT: 'hasAllKeys() requires first argument <object> of type \'object\'',
+
+  // arrayOf()
+  ARRAYOF_NEEDS_ARRAY: 'arrayOf() requires first argument <array> to be an \'array\'',
+  ARRAYOF_NEEDS_STRINGS: 'arrayOf() requires rest argument(s) <types> to be of type \'string\', e.g. \'number\', \'string\', \'boolean\', \'array\', \'object\'',
 };
 
 
@@ -293,6 +297,87 @@ export function hasAllKeys(
 /**
  * Create plugin namespace prefix
  */
-export function pluginPrefix(namespace: string): string {
-  return `plugin-${namespace}:`;
+export function pluginPrefix(name: string): string {
+  if (name.match(/^plugin-\w+:$/)) {
+    return name;
+  }
+
+  return `plugin-${name}:`;
+}
+
+
+/**
+ * Create plugin name
+ */
+export function pluginName(name: string, prefix: string = 'frontvue'): string {
+  if (name.indexOf('frontvue-plugin') === 0) {
+    return name;
+  }
+
+  return `${prefix}-plugin-${name}`;
+}
+
+
+/**
+ * Require node module
+ * Bypass webpack require replacement
+ */
+declare function __webpack_require__(...args: any[]): any;
+declare function __non_webpack_require__(...args: any[]): any;
+export function dynamicRequire(module: string) {
+  /* istanbul ignore if */
+  if (typeof __webpack_require__ === 'function') {
+    return __non_webpack_require__(module);
+  }
+
+  return require(module);
+}
+
+
+/**
+ * Flatten passed in array and return one dimensional array
+ * @param array Multi-dimensional array to be flatten
+ */
+export function flattenArray(array: any[]): any[] {
+  let newArray: any[] = [];
+
+  if (!Array.isArray(array)) {
+    return array;
+  }
+
+  for (const item of array) {
+    const values = Array.isArray(item)
+      ? flattenArray(item)
+      : item;
+
+    newArray = [...newArray, ...values];
+  }
+
+  return newArray;
+}
+
+
+/**
+ * Returns true/false if all items in the array match the passed in type
+ * @param types Type(s) of values (e.g. 'string', 'number', 'object', 'array', 'boolean')
+ * @param array Array to be tested
+ */
+export function arrayOf(array: any[], ...types: string[]): boolean {
+  if (!Array.isArray(array)) {
+    throw new Error(ERRORS.ARRAYOF_NEEDS_ARRAY);
+  }
+
+  if (!types.every(type => typeof type === 'string') || types.length === 0) {
+    throw new Error(ERRORS.ARRAYOF_NEEDS_STRINGS);
+  }
+
+  return array.every(item => {
+    // Dealing with 'array' special case
+    // typeof [] === 'object', unfortunately
+    if (Array.isArray(item)) {
+      return types.includes('array');
+    }
+
+    return types.includes(typeof item);
+  });
 }

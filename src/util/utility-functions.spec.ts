@@ -6,11 +6,14 @@ import { assert, expect } from 'chai';
 import 'mocha';
 import { stdout } from 'test-console';
 import {
+  arrayOf,
   ERRORS,
+  flattenArray,
   getFnName,
   hasAllKeys,
   hasNested,
   limitFn,
+  pluginName,
   pluginPrefix,
   range,
   required,
@@ -390,6 +393,126 @@ describe('Utility Functions', () => {
   describe('pluginPrefix()', () => {
     it('returns plugin prefix', () => {
       expect(pluginPrefix('myplugin')).to.equal('plugin-myplugin:');
+    });
+
+
+    it('doesn\'t prefix already prefixed name', () => {
+      expect(pluginPrefix('plugin-myplugin:')).to.equal('plugin-myplugin:');
+    });
+  });
+
+
+  describe('pluginName()', () => {
+    it('returns prefixed plugin name', () => {
+      expect(pluginName('myplugin')).to.equal('frontvue-plugin-myplugin');
+    });
+
+
+    it('accepts custom prefix', () => {
+      expect(pluginName('myplugin', 'myprefix')).to.equal('myprefix-plugin-myplugin');
+    });
+
+
+    it('doesn\'t prefix already prefixed name', () => {
+      expect(pluginName('frontvue-plugin-myplugin')).to.equal('frontvue-plugin-myplugin');
+    });
+  });
+
+
+  describe('flattenArray()', () => {
+    it('it returns a one dimentional array', () => {
+      expect(flattenArray([1, 2, 3, 4, 5, 6])).to.deep.equal([1, 2, 3, 4, 5, 6]);
+    });
+
+
+    it('returns one dimensional array when two dimensional array is passed in', () => {
+      expect(flattenArray([1, 2, 3, [4, 5, 6]])).to.deep.equal([1, 2, 3, 4, 5, 6]);
+    });
+
+
+    it('returns one dimensional array when three dimensional array is passed in', () => {
+      expect(flattenArray([1, 2, 3, [4, [5, [6]]]])).to.deep.equal([1, 2, 3, 4, 5, 6]);
+    });
+
+
+    it('returns one dimensional array regardless of how multidimensional the passed in array is', () => {
+      expect(flattenArray([1, [2, [3, [4, [5, [6]]]]]])).to.deep.equal([1, 2, 3, 4, 5, 6]);
+    });
+
+
+    it('returns the initial value if not passed in an array', () => {
+      expect(flattenArray('not an array')).to.equal('not an array');
+    });
+  });
+
+
+  describe('arrayOf()', () => {
+    it('returns true when all items in the array are strings', () => {
+      expect(arrayOf(['a', 'b', 'c'], 'string')).to.be.true;
+    });
+
+
+    it('returns true when all items in the array are numbers', () => {
+      expect(arrayOf([1, 2, 3], 'number')).to.be.true;
+    });
+
+
+    it('returns true when all items in the array are boolean', () => {
+      expect(arrayOf([true, false, false], 'boolean')).to.be.true;
+    });
+
+
+    it('returns true when all items in the array are arrays', () => {
+      expect(arrayOf([[1], [2], [3]], 'array')).to.be.true;
+    });
+
+
+    it('returns true when all items in the array are objects', () => {
+      expect(arrayOf([{a: 1}, {b: 2}, {c: 3}], 'object')).to.be.true;
+    });
+
+
+    it('returns true when items in the array are strings and numbers', () => {
+      expect(arrayOf(['a', 'b', 3, 4], 'string', 'number')).to.be.true;
+    });
+
+
+    it('returns true when items in the array are arrays and objects', () => {
+      expect(arrayOf([['a'], ['b'], {c: 3}, {d: 4}], 'array', 'object')).to.be.true;
+    });
+
+
+    it('returns true when items in the array are only strings', () => {
+      expect(arrayOf(['a', 'b', 'c'], 'string', 'number')).to.be.true;
+    });
+
+
+    it('returns false when items in the array are of different types', () => {
+      expect(arrayOf([{a: 1}, [2], '3'], 'object')).to.be.false;
+    });
+
+
+    it('returns false when items in the array are of more types than specified', () => {
+      expect(arrayOf(['a', 1, true], 'string', 'number')).to.be.false;
+    });
+
+
+    it('returns true when array is empty', () => {
+      expect(arrayOf([], 'number')).to.be.true;
+    });
+
+
+    it('throws if an array is not passed in', () => {
+      assert.throws(() => arrayOf(), ERRORS.ARRAYOF_NEEDS_ARRAY);
+      assert.throws(() => arrayOf(1), ERRORS.ARRAYOF_NEEDS_ARRAY);
+      assert.throws(() => arrayOf({}), ERRORS.ARRAYOF_NEEDS_ARRAY);
+    });
+
+
+    it('throws if the type(s) is/are not passed in or is/are not a string', () => {
+      assert.throws(() => arrayOf([]), ERRORS.ARRAYOF_NEEDS_STRINGS);
+      assert.throws(() => arrayOf([], 1), ERRORS.ARRAYOF_NEEDS_STRINGS);
+      assert.throws(() => arrayOf([], false, true), ERRORS.ARRAYOF_NEEDS_STRINGS);
     });
   });
 });
