@@ -18,14 +18,16 @@ describe('PluginManager', () => {
       hooks: ['before', 'midway', 'after'],
     });
     configWizard = ConfigWizard(await ConfigManager());
-    validPlugin = { install: () => true };
+    validPlugin = {
+      install: () => true,
+      name: 'my-valid-plugin',
+    };
   });
 
 
   it('instantiates', () => {
     const pluginManager = PluginManager(taskManager, configWizard, logger);
-    expect(pluginManager).to.be.an('object')
-      .to.contain.keys('use');
+    expect(pluginManager).to.be.an('object').to.contain.keys('use');
   });
 
 
@@ -40,6 +42,76 @@ describe('PluginManager', () => {
     assert.throws(() => PluginManager(taskManager), ERRORS.NO_CONFIG_WIZARD);
     assert.throws(() => PluginManager(taskManager, {}), ERRORS.NO_CONFIG_WIZARD);
     assert.throws(() => PluginManager(taskManager, 1), ERRORS.NO_CONFIG_WIZARD);
+  });
+
+
+  describe('private method loadPlugin()', () => {
+    let pluginManager;
+
+    beforeEach(() => {
+      pluginManager = PluginManager(taskManager, configWizard, logger);
+    });
+
+
+    it('throws if plugin name is not a string', () => {
+      assert.throws(
+        () => pluginManager.loadPlugin(1),
+        ERRORS.PLUGIN_NAME_SHOULD_BE_STRING,
+      );
+    });
+
+
+    it('throws if plugin is not found', () => {
+      assert.throws(
+        () => pluginManager.loadPlugin('non-existent-plugin'),
+        ERRORS.PLUGIN_NOT_FOUND,
+      );
+    });
+  });
+
+
+  describe('private method parsePlugins()', () => {
+    let pluginManager;
+
+    beforeEach(() => {
+      pluginManager = PluginManager(taskManager, configWizard, logger);
+    });
+
+
+    it('returns a promise', () => {
+      expect(pluginManager.parsePlugins(['myplugin1', 'myplugin2']))
+        .to.satisfy(promise => promise instanceof Promise);
+    });
+
+
+    it('returns empty array if no valid plugins are found or loaded', () => {
+      return expect(pluginManager.parsePlugins(['myplugin1', 'myplugin2']))
+        .to.eventually.be.an('array').to.be.empty;
+    });
+
+
+    it('returns an array with installable plugin when installable object is passed', () => {
+      return expect(pluginManager.parsePlugins([{
+        hook: 'myhook',
+        name: 'mytask',
+        taskFn: () => true,
+      }]))
+        .to.eventually.be.an('array')
+        .to.eventually.have.lengthOf(1)
+        .that.eventually.satisfies(array => array[0].hasOwnProperty('install'));
+    });
+
+
+    it('returns an array with the same installable plugin that was passed in', () => {
+      return expect(pluginManager.parsePlugins([{
+        description: 'myPlugin\'s description',
+        install: () => true,
+        name: 'myPlugin',
+      }]))
+        .to.eventually.be.an('array')
+        .to.eventually.have.lengthOf(1)
+        .that.eventually.satisfies(array => array[0].hasOwnProperty('install'));
+    });
   });
 
 
@@ -74,6 +146,7 @@ describe('PluginManager', () => {
 
   it('passes taskSubscribers and configSubscriber arguments to plugin.install() method', async () => {
     const pluginStub = {
+      name: 'my-valid-plugin',
       install(taskSubscribers, configSubscriber) {
         expect(taskSubscribers)
           .to.be.be.an('object')

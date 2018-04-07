@@ -1,13 +1,15 @@
 /**
  * Name: index.ts
- * Description: Plugin manager and validator
+ * Description: Plugin loader, manager and validator
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
  * @since 0.1.0
  */
 
+import * as path from 'path';
 import { IConfigWizard, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskManager, TaskSubscriber } from '../task-manager';
 import Logger, { ILogger } from '../util/logger';
+import { dynamicRequire, flattenArray, pluginName } from '../util/utility-functions';
 import Installable, { InstallableObject } from './installable';
 
 export interface Plugin {
@@ -17,10 +19,14 @@ export interface Plugin {
 }
 
 export interface PluginManager {
-  use(plugin: Plugin | InstallableObject): Promise<void>;
-  validate?(plugin: Plugin): boolean;
+  use(...plugin: Array<string|Plugin|InstallableObject>): Promise<void>;
+  /* test:start */
+  loadPlugin?(name: string): any;
+  parsePlugins?(plugins: PluginsArray): Promise<Plugin[]>;
+  /* test:end */
 }
 
+export type PluginsArray = Array<string|Plugin|InstallableObject>;
 export type PluginSubscribers = TaskSubscriber | QuestionnaireSubscriber;
 
 
@@ -28,6 +34,8 @@ export type PluginSubscribers = TaskSubscriber | QuestionnaireSubscriber;
 export const ERRORS = {
   NO_CONFIG_WIZARD: 'PluginManager() requires second argument to be a ConfigWizard instance',
   NO_TASK_MANAGER: 'PluginManager() requires first argument to be a TaskManager instance',
+  PLUGIN_NAME_SHOULD_BE_STRING: 'PluginManager() passed in plugin name should be a string',
+  PLUGIN_NOT_FOUND: 'PluginManager> plugin could not be loaded',
 };
 
 
@@ -57,6 +65,57 @@ function PluginManager(
 
 
   /**
+   * Parse list of plugins and return installable plugin objects
+   * @param plugins Array of plugins, plugin names or installable objects
+   */
+  async function parsePlugins(plugins: PluginsArray): Promise<Plugin[]> {
+    return await Promise.all(
+      plugins.reduce((pluginsArray: PluginsArray, item) => {
+        let plugin: PluginsArray|Plugin|InstallableObject;
+
+        // Try to load the plugin if current item is a plugin name
+        if (typeof item === 'string') {
+          try {
+            plugin = loadPlugin(item);
+          } catch (error) {
+            // Log the error and return the array without the bad plugin
+            logger.error(error.message);
+            return pluginsArray;
+          }
+        // If it's not a string, then it must be a Plugin or InstallableObject
+        } else {
+          plugin = item;
+        }
+
+        // Flatten everything so we have a one dimentional array
+        // Loaded plugins could be arrays of installable objects
+        return flattenArray([pluginsArray, plugin]);
+      }, [])
+
+      // Convert all to installable plugins
+      .map((plugin: Plugin | InstallableObject) => Installable(plugin)),
+    );
+  }
+
+
+  /**
+   * Get plugin from node_modules and return it
+   * @param name Plugin name
+   */
+  function loadPlugin(name: string): any {
+    if (typeof name !== 'string') {
+      throw new Error(ERRORS.PLUGIN_NAME_SHOULD_BE_STRING);
+    }
+
+    try {
+      return dynamicRequire(pluginName(name));
+    } catch (error) {
+      throw new Error(`${ERRORS.PLUGIN_NOT_FOUND}: ${error.message}`);
+    }
+  }
+
+
+  /**
    * Provides an array of plugin subscribers
    */
   function getPluginSubscribers(): PluginSubscribers[] {
@@ -70,27 +129,44 @@ function PluginManager(
 
 
   /**
-   * Register plugin
-   * @param plugin Plugin object
+   * Convert to installable plugin and call the plugin .install() method
+   * @param plugin Plugin or Installable object
    */
-  async function use(plugin: Plugin | InstallableObject): Promise<void> {
-    // TODO: Add support for plugin as string
-    // TODO: When plugin is of type string, look for plugin in node_modules
-
+  async function install(plugin: Plugin): Promise<void> {
+    // Get the array of plugin subscribers (tasks, questionnaires, etc.)
     const subscribers: PluginSubscribers[] = getPluginSubscribers();
-
-    try {
-      await Installable(plugin).install(...subscribers);
-    } catch (error) {
-      logger.error(error.message);
-    }
+    // Call the plugin's .install() method and provide plugin subscriber objects
+    await plugin.install(...subscribers);
   }
 
 
-  // Return public API
-  return Object.freeze({
+  /**
+   * Register plugin(s)
+   * @param plugins Plugin object(s)
+   */
+  async function use(...plugins: PluginsArray): Promise<void> {
+    // Parse plugins array and get installable plugins
+    const installablePlugins = await parsePlugins(plugins);
+    // Install each plugin
+    await installablePlugins.map(async (plugin: Plugin) => await install(plugin));
+  }
+
+
+  // Public API
+  let publicApi: PluginManager = {
     use,
-  });
+  };
+
+  /* test:start */
+  // Add private methods to API, for testing only
+  publicApi = {...publicApi,
+    loadPlugin,
+    parsePlugins,
+  };
+  /* test:end */
+
+  // Return public API
+  return Object.freeze(publicApi);
 }
 
 export default PluginManager;
