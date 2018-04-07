@@ -133,7 +133,141 @@ describe('ConfigWizard', () => {
   });
 
 
-  describe('method validateQuestionnaire()', () => {
+  describe('method start()', () => {
+    let configWizard: IConfigWizard;
+    let answers;
+
+    before(async () => {
+      configWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
+      configWizard.addQuestionnaire(validQuestionnaire, anotherValidQuestionnaire);
+      // Mock prompt answers
+      inquirerMock({
+        question1: 'answer1',
+        question2: 'answer2',
+      });
+      answers = await configWizard.start();
+    });
+
+
+    it('returns answers object', () => {
+      expect(answers).to.be.an('object');
+    });
+
+
+    it('answers has keys for each questionnaire namespace', () => {
+      expect(answers).to.contain.keys('plugin-a', 'plugin-b');
+    });
+
+
+    it('returns correct answers', () => {
+      expect(answers['plugin-a'].question1).to.equal('answer1');
+      expect(answers['plugin-b'].question1).to.equal('answer1');
+      expect(answers['plugin-a'].question2).to.equal('answer2');
+      expect(answers['plugin-b'].question2).to.equal('answer2');
+    });
+
+
+    it('returns an empty object if there are no questionnaires', async () => {
+      const emptyConfigWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
+      expect(await emptyConfigWizard.start()).to.be.empty;
+    });
+
+
+    it('logs an error if questionnaire fails', async () => {
+      const errorproneConfigWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
+      errorproneConfigWizard.addQuestionnaire(errorproneQuestionnaire);
+      // Mock prompt answers
+      inquirerMock({ question1: 'answer1' });
+      return expect(errorproneConfigWizard.start())
+        .to.be.rejectedWith(RegExp('Test inquirer input validation error message'));
+    });
+  });
+
+
+  describe('method addQuestionnaire()', () => {
+    let configWizard: IConfigWizard;
+
+    beforeEach(async () => configWizard = ConfigWizard(await ConfigManager('frontvue', customReader)));
+
+
+    it('returns true when adding a valid questionnaire', () => {
+      expect(configWizard.addQuestionnaire(validQuestionnaire)).to.be.true;
+    });
+
+
+    it('returns true when adding multiple valid questionnaires', () => {
+      expect(configWizard.addQuestionnaire(validQuestionnaire, anotherValidQuestionnaire)).to.be.true;
+    });
+
+
+    it('returns true when adding at least one valid questionnaire', () => {
+      expect(configWizard.addQuestionnaire(validQuestionnaire, invalidQuestionnaire)).to.be.true;
+    });
+
+
+    it('returns true when adding a valid questionnaire', () => {
+      configWizard.addQuestionnaire(validQuestionnaire);
+      expect(configWizard.getQuestionnaires()).to.contain.keys('plugin-a');
+    });
+
+
+    it('returns false when adding an invalid questionnaire', () => {
+      expect(configWizard.addQuestionnaire(invalidQuestionnaire)).to.be.false;
+    });
+  });
+
+
+  describe('method getSubscriber()', () => {
+    let configWizard: IConfigWizard;
+    let configManager: IConfigManager;
+
+    beforeEach(async () => {
+      configManager = await ConfigManager('frontvue', customReader);
+      configWizard = ConfigWizard(configManager);
+    });
+
+
+    it('returns a function', async () => {
+      expect(configWizard.getSubscriber()).to.be.a('function');
+    });
+
+
+    it('returns a function that can be called only one time', async () => {
+      const subscriber = configWizard.getSubscriber();
+      // First call returns true
+      expect(await subscriber(undefined, validQuestionnaire)).to.be.true;
+
+      // Mock prompt answers
+      inquirerMock({
+        question1: 'answer1',
+        question2: 'answer2',
+      });
+
+      // Second call will return undefined, essentially doing nothing
+      expect(subscriber(undefined, validQuestionnaire)).to.be.undefined;
+    });
+
+
+    it('adds questionnaire', async () => {
+      const pluginDefaults = {
+        question1: 'default-answer1',
+        question2: 'default-answer2',
+      };
+      const subscriber = configWizard.getSubscriber();
+      expect(await subscriber(pluginDefaults, validQuestionnaire)).to.be.true;
+      expect(configWizard.getQuestionnaires()).to.contain.keys('plugin-a');
+    });
+
+
+    it('returns false if questionnaire namespace is already added', async () => {
+      configWizard.addQuestionnaire(validQuestionnaire);
+      const subscriber = configWizard.getSubscriber();
+      expect(await subscriber(undefined, validQuestionnaire)).to.be.false;
+    });
+  });
+
+
+  describe('private method validateQuestionnaire()', () => {
     let configWizard: IConfigWizard;
 
     before(async () => configWizard = ConfigWizard(await ConfigManager('frontvue', customReader)));
@@ -191,40 +325,7 @@ describe('ConfigWizard', () => {
   });
 
 
-  describe('method addQuestionnaire()', () => {
-    let configWizard: IConfigWizard;
-
-    beforeEach(async () => configWizard = ConfigWizard(await ConfigManager('frontvue', customReader)));
-
-
-    it('returns true when adding a valid questionnaire', () => {
-      expect(configWizard.addQuestionnaire(validQuestionnaire)).to.be.true;
-    });
-
-
-    it('returns true when adding multiple valid questionnaires', () => {
-      expect(configWizard.addQuestionnaire(validQuestionnaire, anotherValidQuestionnaire)).to.be.true;
-    });
-
-
-    it('returns true when adding at least one valid questionnaire', () => {
-      expect(configWizard.addQuestionnaire(validQuestionnaire, invalidQuestionnaire)).to.be.true;
-    });
-
-
-    it('returns true when adding a valid questionnaire', () => {
-      configWizard.addQuestionnaire(validQuestionnaire);
-      expect(configWizard.getQuestionnaires()).to.contain.keys('plugin-a');
-    });
-
-
-    it('returns false when adding an invalid questionnaire', () => {
-      expect(configWizard.addQuestionnaire(invalidQuestionnaire)).to.be.false;
-    });
-  });
-
-
-  describe('method startQuestionnaire()', () => {
+  describe('private method startQuestionnaire()', () => {
     it('rejects promise if trying to start non-existing questionnaire', async () => {
       const emptyConfigWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
       return expect(emptyConfigWizard.startQuestionnaire('non-existent'))
@@ -233,108 +334,7 @@ describe('ConfigWizard', () => {
   });
 
 
-  describe('method start()', () => {
-    let configWizard: IConfigWizard;
-    let answers;
-
-    before(async () => {
-      configWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
-      configWizard.addQuestionnaire(validQuestionnaire, anotherValidQuestionnaire);
-      // Mock prompt answers
-      inquirerMock({
-        question1: 'answer1',
-        question2: 'answer2',
-      });
-      answers = await configWizard.start();
-    });
-
-
-    it('returns answers object', () => {
-      expect(answers).to.be.an('object');
-    });
-
-
-    it('answers has keys for each questionnaire namespace', () => {
-      expect(answers).to.contain.keys('plugin-a', 'plugin-b');
-    });
-
-
-    it('returns correct answers', () => {
-      expect(answers['plugin-a'].question1).to.equal('answer1');
-      expect(answers['plugin-b'].question1).to.equal('answer1');
-      expect(answers['plugin-a'].question2).to.equal('answer2');
-      expect(answers['plugin-b'].question2).to.equal('answer2');
-    });
-
-
-    it('returns an empty object if there are no questionnaires', async () => {
-      const emptyConfigWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
-      expect(await emptyConfigWizard.start()).to.be.empty;
-    });
-
-
-    it('logs an error if questionnaire fails', async () => {
-      const errorproneConfigWizard = ConfigWizard(await ConfigManager('frontvue', customReader));
-      errorproneConfigWizard.addQuestionnaire(errorproneQuestionnaire);
-      // Mock prompt answers
-      inquirerMock({ question1: 'answer1' });
-      return expect(errorproneConfigWizard.start())
-        .to.be.rejectedWith(RegExp('Test inquirer input validation error message'));
-    });
-  });
-
-
-  describe('method getSubscriber()', () => {
-    let configWizard: IConfigWizard;
-    let configManager: IConfigManager;
-
-    beforeEach(async () => {
-      configManager = await ConfigManager('frontvue', customReader);
-      configWizard = ConfigWizard(configManager);
-    });
-
-
-    it('returns a function', async () => {
-      expect(configWizard.getSubscriber()).to.be.a('function');
-    });
-
-
-    it('returns a function that can be called only one time', async () => {
-      const subscriber = configWizard.getSubscriber();
-      // First call returns true
-      expect(await subscriber(undefined, validQuestionnaire)).to.be.true;
-
-      // Mock prompt answers
-      inquirerMock({
-        question1: 'answer1',
-        question2: 'answer2',
-      });
-
-      // Second call will return undefined, essentially doing nothing
-      expect(subscriber(undefined, validQuestionnaire)).to.be.undefined;
-    });
-
-
-    it('adds questionnaire', async () => {
-      const pluginDefaults = {
-        question1: 'default-answer1',
-        question2: 'default-answer2',
-      };
-      const subscriber = configWizard.getSubscriber();
-      expect(await subscriber(pluginDefaults, validQuestionnaire)).to.be.true;
-      expect(configWizard.getQuestionnaires()).to.contain.keys('plugin-a');
-    });
-
-
-    it('returns false if questionnaire namespace is already added', async () => {
-      configWizard.addQuestionnaire(validQuestionnaire);
-      const subscriber = configWizard.getSubscriber();
-      expect(await subscriber(undefined, validQuestionnaire)).to.be.false;
-    });
-  });
-
-
-  describe('method isConfigured()', () => {
+  describe('private method isConfigured()', () => {
     let configManager: IConfigManager;
     let configWizard: IConfigWizard;
 
@@ -379,7 +379,7 @@ describe('ConfigWizard', () => {
   });
 
 
-  describe('method getConfiguration()', () => {
+  describe('private method getConfiguration()', () => {
     let configManager: IConfigManager;
     let configWizard: IConfigWizard;
 
@@ -423,7 +423,7 @@ describe('ConfigWizard', () => {
   });
 
 
-  describe('method setConfiguration()', () => {
+  describe('private method setConfiguration()', () => {
     let configManager: IConfigManager;
     let configWizard: IConfigWizard;
 
