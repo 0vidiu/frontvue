@@ -12,6 +12,22 @@ import TaskManager from './task-manager';
 import taskInitProject from './tasks/task-init-project';
 import Logger, { ILogger } from './util/logger';
 
+const taskManagerConfig = {
+  hooks: [
+    'init',
+    'config',
+    'template',
+    'clean',
+    'process',
+    'watch',
+  ],
+};
+
+const plugins = [
+  taskInitProject,
+  'stylus',
+];
+
 
 /**
  * Main Frontvue constructor
@@ -21,16 +37,12 @@ async function Frontvue() {
   const logger = Logger(name);
   const configManager = await ConfigManager(name);
   const configWizard = ConfigWizard(configManager);
-  const taskManager = TaskManager({
-    hooks: [
-      'init',
-    ],
-  });
+  const taskManager = TaskManager(taskManagerConfig);
   const pluginManager = PluginManager(taskManager, configWizard);
   const { run } = taskManager;
 
-  // Use custom plugin
-  await pluginManager.use(taskInitProject);
+  // Use custom plugin(s)
+  await pluginManager.use(...plugins);
 
   // Return public API
   return Object.freeze({
