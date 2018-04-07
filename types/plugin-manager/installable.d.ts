@@ -22,7 +22,7 @@ export declare const ERRORS: {
     NOT_AN_OBJECT: string;
 };
 /**
- * Validate plugin
+ * Check if object is an installable Plugin
  * @param object Plugin object to be tested
  */
 export declare function isInstallable(object: {

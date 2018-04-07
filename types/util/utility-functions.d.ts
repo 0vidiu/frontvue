@@ -17,6 +17,8 @@ export declare const ERRORS: {
     REQUIRED_NEEDS_MESSAGE: string;
     HAS_ALL_KEYS_NEEDS_KEYS_ARRAY: string;
     HAS_ALL_KEYS_NEEDS_OBJECT: string;
+    ARRAYOF_NEEDS_ARRAY: string;
+    ARRAYOF_NEEDS_STRINGS: string;
 };
 /**
  * Check object for path
@@ -77,4 +79,20 @@ export declare function hasAllKeys(object?: ({
 /**
  * Create plugin namespace prefix
  */
-export declare function pluginPrefix(namespace: string): string;
+export declare function pluginPrefix(name: string): string;
+/**
+ * Create plugin name
+ */
+export declare function pluginName(name: string, prefix?: string): string;
+export declare function dynamicRequire(module: string): any;
+/**
+ * Flatten passed in array and return one dimensional array
+ * @param array Multi-dimensional array to be flatten
+ */
+export declare function flattenArray(array: any[]): any[];
+/**
+ * Returns true/false if all items in the array match the passed in type
+ * @param types Type(s) of values (e.g. 'string', 'number', 'object', 'array', 'boolean')
+ * @param array Array to be tested
+ */
+export declare function arrayOf(array: any[], ...types: string[]): boolean;
