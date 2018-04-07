@@ -136,7 +136,7 @@ describe('ConfigManager', () => {
 
   it('removes multiple options', async () => {
     const removed = await configManager.remove('key2', 'key3');
-    expect(await configManager.get()).to.eql({});
+    expect(await configManager.get()).to.not.contain.keys('key2', 'key3');
   });
 
 

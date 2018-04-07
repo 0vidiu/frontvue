@@ -18,7 +18,7 @@ export interface Config {
 
 export interface IConfigManager {
   has(key: string): Promise<boolean>;
-  get(key?: string | string[]): Promise<Config | any>;
+  get(key?: string | string[]): Promise<Config|any>;
   set(option: Config | string, value?: any): Promise<boolean|Error>;
   remove(...options: string[]): Promise<boolean|Error>;
   errorHandler?(error?: Error): Error;
@@ -92,7 +92,7 @@ async function ConfigManager(
    * Retrieve value from configuration
    * @param key Configuration option key
    */
-  async function get(key?: string | string[]): Promise<Config | any> {
+  async function get(key?: string | string[]): Promise<Config|any> {
     config = await configReader.fetch();
 
     // If no key is specified, return the entire config object
