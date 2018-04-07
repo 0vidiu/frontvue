@@ -36,6 +36,14 @@ async function PackageJsonConfigReader(
   filepath: string = './package.json',
   logger: ILogger = Logger('frontvue')('packageJsonConfigReader'),
 ): Promise<ConfigReader> {
+  /* test:start */
+  // Change the package.json filepath for testing
+  // This won't add anything to the real package.json file
+  if (filepath === './package.json') {
+    filepath = './test.package.json';
+  }
+  /* test:end */
+
   if (typeof namespace !== 'string') {
     throw new Error(ERRORS.INVALID_NAMESPACE);
   }
