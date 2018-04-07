@@ -5,8 +5,10 @@
  * @since 0.1.0
  */
 
+import chalk from 'chalk';
 import * as gulp from 'gulp';
-import { Config } from '../config-manager';
+import ConfigManager, { Config } from '../config-manager';
+import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskSubscriber } from '../task-manager';
 import Logger, { ILogger } from '../util/logger';
@@ -39,7 +41,7 @@ export const ERRORS = {
 
 
 /**
- * Validate plugin
+ * Check if object is an installable Plugin
  * @param object Plugin object to be tested
  */
 export function isInstallable(object: {[key: string]: any}): boolean | void {
@@ -69,6 +71,8 @@ export function isInstallable(object: {[key: string]: any}): boolean | void {
  */
 export function getUtilitiesProvider(name: string): PluginProvider {
   const logger = Logger('frontvue')(name);
+  // TODO: Implement config manager proxy for plugin
+  // const config = ConfigManagerProxy();
 
   return Object.freeze({
     logger,
@@ -85,9 +89,10 @@ export function provideUtilities(taskFn: AnyFunction, name: string): AnyFunction
   const provider = getUtilitiesProvider(name);
 
   return async function (cb) {
-    provider.logger.debug(`Started...`);
+    const startTime = Date.now();
     await taskFn(cb, provider);
-    provider.logger.debug(`Finished...`);
+    const duration = (Date.now() - startTime) / 1000;
+    provider.logger.debug(chalk.bold(`took ${duration.toFixed(1)}s`));
   };
 }
 
