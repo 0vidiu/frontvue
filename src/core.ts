@@ -23,10 +23,17 @@ const taskManagerConfig = {
   ],
 };
 
-const plugins = [
+let plugins = [
   taskInitProject,
   'stylus',
 ];
+
+/* test:start */
+// Remove external plugins when testing
+plugins = [
+  taskInitProject,
+];
+/* test:end */
 
 
 /**
