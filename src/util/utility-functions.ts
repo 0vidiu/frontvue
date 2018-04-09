@@ -195,7 +195,6 @@ export async function retry(
     delay = 1000,
     retries = 3,
     logChannel = 'retry()',
-    logNamespace = 'frontvue',
   } = options;
 
   // Options validation
@@ -210,7 +209,7 @@ export async function retry(
   // Array to store the errors
   const errors: Error[] = [];
   // Logger instance
-  const logger: ILogger = Logger(logNamespace)(logChannel);
+  const logger: ILogger = Logger.getInstance()(logChannel);
 
 
   /**

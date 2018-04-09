@@ -6,6 +6,7 @@
  */
 
 import * as gulp from 'gulp';
+import frontvue from '../core';
 import { PluginProvider } from '../plugin-manager/installable';
 import { AnyFunction, sleep } from '../util/utility-functions';
 
@@ -45,9 +46,8 @@ const taskExport = {
  * @param done Gulp async callback
  */
 async function taskFn(done: AnyFunction, { logger }: PluginProvider): Promise<any> {
-  logger.debug('Something happening now...');
-  logger.debug('That something has been completed!');
-  done && done();
+  // return gulp.series('template', 'clean', 'process', 'watch');
+  return done && done();
 }
 
 

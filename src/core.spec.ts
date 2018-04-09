@@ -5,7 +5,7 @@ import frontvue from './core';
 
 
 describe('Frontvue', () => {
-  it('instantiates', async () => {
+  it('instance', async () => {
     const instance = await frontvue;
 
     inquirerMock({
@@ -14,5 +14,5 @@ describe('Frontvue', () => {
     });
 
     expect(instance).to.be.an('object');
-  }).timeout(12000);
+  }).timeout(20000);
 });

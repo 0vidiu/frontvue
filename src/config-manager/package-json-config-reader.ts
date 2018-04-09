@@ -29,13 +29,13 @@ export const ERRORS = {
  * Factory function for package.json configuration reader
  * @param namespace Configuration key in package.json 'config' object
  * @param filepath Custom file path to store/get configuration
- * @param logger Instance of a logger that implements ILogger interface
  */
 async function PackageJsonConfigReader(
   namespace: string = 'frontvue',
   filepath: string = './package.json',
-  logger: ILogger = Logger('frontvue')('packageJsonConfigReader'),
 ): Promise<ConfigReader> {
+  const logger: ILogger = Logger.getInstance()('packageJsonConfigReader');
+
   /* test:start */
   // Change the package.json filepath for testing
   // This won't add anything to the real package.json file

@@ -7,7 +7,6 @@ import * as fs from 'fs';
 import 'mocha';
 import * as mockfs from 'mock-fs';
 import * as path from 'path';
-import Logger from '../util/logger';
 import PackageJsonConfigReader, { ERRORS } from './package-json-config-reader';
 
 describe('PackageJsonConfigReader', () => {
@@ -108,14 +107,6 @@ describe('PackageJsonConfigReader', () => {
     expect(await configReader.destroy()).to.eql({ key: 'value' });
     expect(await configReader.fetch()).to.be.undefined;
   });
-
-
-  it('accepts custom logger', () => {
-    const filepath = path.join(testDir, priorConfiguredFile);
-    return expect(
-      PackageJsonConfigReader('frontvue', filepath, Logger('frontvue')('customLogger')),
-    ).to.eventually.not.throw;
-  }).timeout(12000);
 
 
   it('rejects promise if filepath config file can\'t be read', () => {

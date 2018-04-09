@@ -5,7 +5,7 @@
  * @since 0.1.0
  */
 
-import { pluginPrefix, required, arrayOf } from '../util/utility-functions';
+import { arrayOf, pluginPrefix, required } from '../util/utility-functions';
 import ConfigManager, { Config, IConfigManager } from './index';
 import ConfigPrefixer from './prefixer';
 

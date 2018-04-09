@@ -319,13 +319,6 @@ describe('Utility Functions', () => {
       });
 
 
-      it('accepts custom logger namespace', async () => {
-        const { alwaysErrorsFn } = badFn('alwaysErrorsFn');
-        await retry(alwaysErrorsFn, { logNamespace: 'customNamespace', retries: 1 }).catch(ignore => undefined);
-        expect(inspect.output.join(' ')).to.have.string('customNamespace');
-      }).timeout(5000);
-
-
       it('accepts custom logger channel', async () => {
         const { alwaysErrorsFn } = badFn('alwaysErrorsFn');
         await retry(alwaysErrorsFn, { logChannel: 'customChannel', retries: 1 }).catch(ignore => undefined);

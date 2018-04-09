@@ -34,7 +34,7 @@ const plugins = [
  */
 async function Frontvue() {
   const name = 'frontvue';
-  const logger = Logger(name);
+  const logger = Logger.getInstance();
   const configManager = await ConfigManager(name);
   const configWizard = ConfigWizard(configManager);
   const taskManager = TaskManager(taskManagerConfig);

@@ -6,7 +6,7 @@ import { taskFn } from './task-init-project';
 
 describe('#Task: Init project', () => {
   const callback: AnyFunction = () => true;
-  const logger = Logger('frontvue')('init');
+  const logger = Logger.getInstance()('init');
 
   it('does what it is supposed to do', () => {
     expect(taskFn(callback, { logger })).to.not.throw;

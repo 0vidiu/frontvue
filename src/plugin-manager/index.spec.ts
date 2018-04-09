@@ -3,17 +3,14 @@ import 'mocha';
 import ConfigManager from '../config-manager';
 import ConfigWizard from '../config-wizard';
 import TaskManager from '../task-manager';
-import Logger from '../util/logger';
 import PluginManager, { ERRORS } from './index';
 
 describe('PluginManager', () => {
-  let logger;
   let taskManager;
   let configWizard;
   let validPlugin;
 
   beforeEach(async () => {
-    logger = Logger('frontvue')('PluginManager');
     taskManager = TaskManager({
       hooks: ['before', 'midway', 'after'],
     });
@@ -26,7 +23,7 @@ describe('PluginManager', () => {
 
 
   it('instantiates', () => {
-    const pluginManager = PluginManager(taskManager, configWizard, logger);
+    const pluginManager = PluginManager(taskManager, configWizard);
     expect(pluginManager).to.be.an('object').to.contain.keys('use');
   });
 
@@ -49,7 +46,7 @@ describe('PluginManager', () => {
     let pluginManager;
 
     beforeEach(() => {
-      pluginManager = PluginManager(taskManager, configWizard, logger);
+      pluginManager = PluginManager(taskManager, configWizard);
     });
 
 
@@ -74,7 +71,7 @@ describe('PluginManager', () => {
     let pluginManager;
 
     beforeEach(() => {
-      pluginManager = PluginManager(taskManager, configWizard, logger);
+      pluginManager = PluginManager(taskManager, configWizard);
     });
 
 

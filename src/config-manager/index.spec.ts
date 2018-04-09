@@ -2,7 +2,6 @@ import { assert, expect } from 'chai';
 import 'mocha';
 import * as path from 'path';
 import { stdout } from 'test-console';
-import Logger from '../util/logger';
 import ConfigManager, { ERRORS, IConfigManager } from './index';
 import { Config } from './index';
 import { ConfigReader } from './package-json-config-reader';
@@ -49,12 +48,6 @@ describe('ConfigManager', () => {
     const customConfigManager = await ConfigManager('frontvue', customReader);
     expect(customConfigManager).to.be.an('object')
       .to.contain.keys('get', 'has', 'remove', 'set');
-  });
-
-
-  it('instantiates with custom logger', async () => {
-    const customLogger = Logger('frontvue')('customConfigManager');
-    const configManagerWithLogger = await ConfigManager('frontvue', undefined, customLogger);
   });
 
 

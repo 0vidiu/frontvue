@@ -6,7 +6,6 @@ import { assert, expect } from 'chai';
 import 'mocha';
 import * as inquirerMock from '../../test/inquirer-mock';
 import ConfigManager, { Config, IConfigManager } from '../config-manager';
-import Logger from '../util/logger';
 import ConfigWizard, { ConfigQuestionnaire, ERRORS, IConfigWizard } from './index';
 
 
@@ -115,14 +114,6 @@ describe('ConfigWizard', () => {
   describe('Instance', () => {
     it('instantiates', async () => {
       expect(ConfigWizard(await ConfigManager('frontvue', customReader))).to.be.an('object')
-        .to.contain.keys('addQuestionnaire', 'getSubscriber', 'start');
-    });
-
-
-    it('instantiates with custom logger constructor', async () => {
-      const configManager = await ConfigManager('frontvue', customReader);
-      const customLogger = Logger('frontvue');
-      expect(ConfigWizard(configManager, customLogger)).to.be.an('object')
         .to.contain.keys('addQuestionnaire', 'getSubscriber', 'start');
     });
 

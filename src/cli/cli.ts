@@ -23,7 +23,16 @@ program
       const instance = await frontvue;
       const logger = instance.logger('cli');
       logger.info(`Creating a new project ./${name}`);
-      await instance.run('init');
+
+      await Promise.all(
+        [
+          instance.run('init'),
+          instance.run('template'),
+          instance.run('clean'),
+          instance.run('process'),
+          instance.run('watch'),
+        ],
+      );
     })
     .description('Initialize a new project');
 
@@ -41,7 +50,7 @@ program
       const instance = await frontvue;
       const logger = instance.logger('cli');
       logger.info(`Starting ${hook}...`);
-      instance.run(hook);
+      await instance.run(hook);
     });
 
 program.parse(process.argv);

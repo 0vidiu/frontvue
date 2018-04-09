@@ -60,7 +60,7 @@ export const ERRORS = {
  * Log messages to the console
  * @param namespace Module identifier
  */
-function Logger(namespace: string): (channel?: string) => ILogger {
+export function Logger(namespace: string): (channel?: string) => ILogger {
   const env: string | undefined = process.env.NODE_ENV;
   const debugEnv: string[] = ['development', 'test'];
 
@@ -191,4 +191,35 @@ function Logger(namespace: string): (channel?: string) => ILogger {
   };
 }
 
-export default Logger;
+
+/**
+ * Logger Singleton Factory
+ * @param namespace Logger namespace
+ */
+function LoggerFactory() {
+  let instance: (channel?: string) => ILogger;
+
+
+  /**
+   * Create logger instance
+   */
+  function createInstance(namespace: string) {
+    return Logger(namespace);
+  }
+
+
+  // Return public API for Logger Singleton
+  return Object.freeze({
+    /**
+     * Create new or retrieve existing Logger instance
+     */
+    getInstance(namespace: string = 'frontvue') {
+      if (typeof instance === 'undefined') {
+        instance = createInstance(namespace);
+      }
+      return instance;
+    },
+  });
+}
+
+export default LoggerFactory();

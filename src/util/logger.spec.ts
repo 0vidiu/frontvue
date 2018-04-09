@@ -1,7 +1,7 @@
 import { assert, expect } from 'chai';
 import 'mocha';
 import { stdout } from 'test-console';
-import Logger, { ERRORS, LogLevel } from './logger';
+import LoggerFactory, { ERRORS, Logger, LogLevel } from './logger';
 
 describe('Logger', () => {
   describe('Constructor', () => {
@@ -119,6 +119,26 @@ describe('Logger', () => {
       logger.warn('warn message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
+    });
+  });
+
+  describe('Factory', () => {
+    it('has .getInstance() method', () => {
+      expect(LoggerFactory).to.have.keys('getInstance');
+      expect(LoggerFactory.getInstance).to.be.a('function');
+    });
+
+
+    it('gets logger instance', () => {
+      expect(LoggerFactory.getInstance()).to.be.a('function');
+      expect(LoggerFactory.getInstance()()).to.be.an('object')
+        .to.contain.keys('channel', 'debug', 'error', 'fatal', 'info', 'log', 'success', 'warn');
+    });
+
+
+    it('gets logger instance with custom namespace', () => {
+      expect(LoggerFactory.getInstance('namespace')('channel')).to.be.an('object')
+        .to.contain.keys('channel', 'debug', 'error', 'fatal', 'info', 'log', 'success', 'warn');
     });
   });
 });

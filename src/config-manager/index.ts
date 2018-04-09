@@ -37,9 +37,9 @@ export const ERRORS = {
 async function ConfigManager(
   namespace: string = 'frontvue',
   customReader?: ConfigReaderConstructor,
-  logger: ILogger = Logger('frontvue')('ConfigManager'),
 ): Promise<IConfigManager> {
   let configReader: ConfigReader;
+  const logger: ILogger = Logger.getInstance()('ConfigManager');
 
   // Instantiate configReader
   try {

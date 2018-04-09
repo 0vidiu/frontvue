@@ -68,13 +68,12 @@ export const ERRORS = {
  */
 function ConfigWizard(
   configManager: IConfigManager = required(ERRORS.CONFIG_MANAGER_REQUIRED),
-  NamedLogger = Logger('frontvue'),
 ): IConfigWizard {
   // Object for storing config questionnaires (main config and plugins)
   let questionnaires: Questionnaires = {};
 
   // Instantiate logger with custom channel
-  const logger: ILogger = NamedLogger('ConfigWizard');
+  const logger: ILogger = Logger.getInstance()('ConfigWizard');
 
 
   /**
@@ -254,6 +253,7 @@ function ConfigWizard(
         // Merge configuration defaults with answers from questionnaire
         const newAnswers = { ...currentDefaults, ...answers };
 
+        logger.info(`Your '${questionnaire.namespace}' configuration:`);
         console.log(JSON.stringify(newAnswers, null, 2));
         return await setConfiguration(questionnaire.namespace, newAnswers);
       }
@@ -276,7 +276,7 @@ function ConfigWizard(
     }
 
     logger.info(`Configure '${namespace}'`);
-    return inquirer.prompt(questionnaires[namespace]);
+    return await inquirer.prompt(questionnaires[namespace]);
   }
 
 

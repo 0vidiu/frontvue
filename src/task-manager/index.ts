@@ -42,7 +42,7 @@ export interface TaskManagerOptions {
 function TaskManager(options?: TaskManagerOptions): TaskManager {
   let hooks: string[] = [];
   const tasks: Tasks = {};
-  const logger: ILogger = Logger('frontvue')('TaskManager');
+  const logger: ILogger = Logger.getInstance()('TaskManager');
 
   if (options && hasNested(options, 'hooks')) {
     hooks = [...hooks, ...options.hooks];
