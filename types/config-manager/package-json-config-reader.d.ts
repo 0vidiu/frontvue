@@ -1,4 +1,3 @@
-import { ILogger } from '../util/logger';
 import { Config } from './index';
 export interface ConfigReader {
     destroy(): Promise<Config | Error>;
@@ -14,7 +13,6 @@ export declare const ERRORS: {
  * Factory function for package.json configuration reader
  * @param namespace Configuration key in package.json 'config' object
  * @param filepath Custom file path to store/get configuration
- * @param logger Instance of a logger that implements ILogger interface
  */
-declare function PackageJsonConfigReader(namespace?: string, filepath?: string, logger?: ILogger): Promise<ConfigReader>;
+declare function PackageJsonConfigReader(namespace?: string, filepath?: string): Promise<ConfigReader>;
 export default PackageJsonConfigReader;

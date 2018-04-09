@@ -1,10 +1,3 @@
-/**
- * Name: config-manager.ts
- * Description: Config Manager Factory
- * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
- */
-import { ILogger } from '../util/logger';
 import { ConfigReaderConstructor } from './package-json-config-reader';
 export interface Config {
     [key: string]: any;
@@ -25,5 +18,5 @@ export declare const ERRORS: {
  * used in package.json "{ "config": { "<namespace>": {} } }"
  * @param customReader Custom ConfigReader
  */
-declare function ConfigManager(namespace?: string, customReader?: ConfigReaderConstructor, logger?: ILogger): Promise<IConfigManager>;
+declare function ConfigManager(namespace?: string, customReader?: ConfigReaderConstructor): Promise<IConfigManager>;
 export default ConfigManager;

@@ -1,5 +1,4 @@
 import { Config, IConfigManager } from '../config-manager';
-import { ILogger } from '../util/logger';
 export interface ConfigQuestion {
     name: string;
     type: string;
@@ -40,5 +39,5 @@ export declare const ERRORS: {
  * Configuration wizard constructor
  * @param configManager Instance of an IConfigmanager
  */
-declare function ConfigWizard(configManager?: IConfigManager, NamedLogger?: (channel?: string | undefined) => ILogger): IConfigWizard;
+declare function ConfigWizard(configManager?: IConfigManager): IConfigWizard;
 export default ConfigWizard;

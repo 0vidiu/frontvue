@@ -27,5 +27,8 @@ export declare const ERRORS: {
  * Log messages to the console
  * @param namespace Module identifier
  */
-declare function Logger(namespace: string): (channel?: string) => ILogger;
-export default Logger;
+export declare function Logger(namespace: string): (channel?: string) => ILogger;
+declare const _default: Readonly<{
+    getInstance(namespace?: string): (channel?: string | undefined) => ILogger;
+}>;
+export default _default;

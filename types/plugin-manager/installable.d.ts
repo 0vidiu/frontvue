@@ -41,12 +41,12 @@ export declare function getUtilitiesProvider(name: string): PluginProvider;
 export declare function provideUtilities(taskFn: AnyFunction, name: string): AnyFunction;
 /**
  * Installable plugin factory
- * @param configDefaults Configuration defaults object
- * @param configQuestionnaire Configuration questionnaire object
- * @param description Task description
- * @param hook Task registration hook
- * @param name Task name
- * @param taskFn Function to be called when running the task
+ * @param { configDefaults } Configuration defaults object
+ * @param { configQuestionnaire } Configuration questionnaire object
+ * @param { description } Task description
+ * @param { hook } Task registration hook
+ * @param { name } Task name
+ * @param { taskFn } Function to be called when running the task
  */
 declare function Installable(plugin: Plugin | InstallableObject): Plugin;
 export default Installable;

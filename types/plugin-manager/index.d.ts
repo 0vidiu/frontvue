@@ -1,6 +1,5 @@
 import { IConfigWizard, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskManager, TaskSubscriber } from '../task-manager';
-import { ILogger } from '../util/logger';
 import { InstallableObject } from './installable';
 export interface Plugin {
     name: string;
@@ -23,5 +22,5 @@ export declare const ERRORS: {
 /**
  * PluginManager constructor
  */
-declare function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard, logger?: ILogger): PluginManager;
+declare function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): PluginManager;
 export default PluginManager;
