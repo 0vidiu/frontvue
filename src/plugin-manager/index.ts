@@ -42,11 +42,9 @@ export const ERRORS = {
 /**
  * PluginManager constructor
  */
-function PluginManager(
-  taskManager: TaskManager,
-  configWizard: IConfigWizard,
-  logger: ILogger = Logger('frontvue')('PluginManager'),
-): PluginManager {
+function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): PluginManager {
+  const logger: ILogger = Logger.getInstance()('PluginManager');
+
   if (
     typeof taskManager === 'undefined' ||
     typeof taskManager !== 'object' ||
@@ -148,7 +146,11 @@ function PluginManager(
     // Parse plugins array and get installable plugins
     const installablePlugins = await parsePlugins(plugins);
     // Install each plugin
-    await installablePlugins.map(async (plugin: Plugin) => await install(plugin));
+    await Promise.all(
+      installablePlugins.map(
+        async (plugin: Plugin) => await install(plugin),
+      ),
+    );
   }
 
 
