@@ -7,7 +7,7 @@
 
 import chalk from 'chalk';
 import * as gulp from 'gulp';
-import ConfigManager, { Config } from '../config-manager';
+import ConfigManager, { Config, IConfigManager } from '../config-manager';
 import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskSubscriber } from '../task-manager';
@@ -26,6 +26,7 @@ export interface InstallableObject {
 }
 
 export interface PluginProvider {
+  config: IConfigManager;
   logger: ILogger;
 }
 
@@ -69,12 +70,14 @@ export function isInstallable(object: {[key: string]: any}): boolean | void {
  * Create utilities provider
  * @param name Plugin name
  */
-export function getUtilitiesProvider(name: string): PluginProvider {
+export async function getUtilitiesProvider(name: string): Promise<PluginProvider> {
   const logger: ILogger = Logger.getInstance()(name);
-  // TODO: Implement config manager proxy for plugin
-  // const config = ConfigManagerProxy();
+  // TODO: Find a better way of getting the same instance of ConfigManager from Frontvue()
+  // TODO: Will have to make ConfigManager a Singleton
+  const config: IConfigManager = ConfigManagerProxy(await ConfigManager(), name);
 
   return Object.freeze({
+    config,
     logger,
   });
 }
@@ -85,8 +88,8 @@ export function getUtilitiesProvider(name: string): PluginProvider {
  * @param taskFn Plugin task function
  * @param name Plugin name
  */
-export function provideUtilities(taskFn: AnyFunction, name: string): AnyFunction {
-  const provider = getUtilitiesProvider(name);
+export async function provideUtilities(taskFn: AnyFunction, name: string): Promise<AnyFunction> {
+  const provider = await getUtilitiesProvider(name);
 
   return async function (cb) {
     const startTime = Date.now();
@@ -148,7 +151,7 @@ function Installable(plugin: Plugin | InstallableObject): Plugin {
     configSubscriber: QuestionnaireSubscriber,
   ): Promise<void> {
     // Register Gulp task
-    gulp.task(name, provideUtilities(taskFn, name));
+    gulp.task(name, await provideUtilities(taskFn, name));
     // Subscribe task to hook
     taskSubscribers[hook] && taskSubscribers[hook](name);
 

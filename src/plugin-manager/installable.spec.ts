@@ -146,7 +146,11 @@ describe('Installable', () => {
 
 
   describe('getUtilityProvider()', () => {
-    const subject = getUtilitiesProvider('name');
+    let subject;
+
+    beforeEach(async () => {
+      subject = await getUtilitiesProvider('name');
+    });
 
     it('returns an object', () => {
       expect(subject).to.be.an('object');
@@ -154,7 +158,7 @@ describe('Installable', () => {
 
 
     it('has logger member', () => {
-      expect(subject).to.contain.keys('logger');
+      expect(subject).to.contain.keys('logger', 'config');
     });
   });
 
@@ -163,9 +167,9 @@ describe('Installable', () => {
     let wasCalled: boolean;
     let wrappedFn: AnyFunction;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       wasCalled = false;
-      wrappedFn = provideUtilities(function (done, provider) {
+      wrappedFn = await provideUtilities(function (done, provider) {
         wasCalled = true;
       }, 'wrappedFn');
     });
@@ -182,8 +186,8 @@ describe('Installable', () => {
     });
 
 
-    it('provides wrapped function with logger', () => {
-      wrappedFn = provideUtilities(function (done, provider) {
+    it('provides wrapped function with logger', async () => {
+      wrappedFn = await provideUtilities(function (done, provider) {
         expect(provider).to.be.an('object').to.contain.keys('logger');
       }, 'wrappedFn');
       wrappedFn();

@@ -44,8 +44,10 @@ const taskExport = {
 /**
  * Task main function
  * @param done Gulp async callback
+ * @param pluginProvider Assortment of tools for plugins and tasks (e.g. logger, config manager, etc.)
  */
-async function taskFn(done: AnyFunction, { logger }: PluginProvider): Promise<any> {
+async function taskFn(done: AnyFunction, { config, logger }: PluginProvider): Promise<any> {
+  console.log(JSON.stringify(await config.get(), null, 2));
   // return gulp.series('template', 'clean', 'process', 'watch');
   return done && done();
 }
