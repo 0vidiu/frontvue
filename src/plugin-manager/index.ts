@@ -145,12 +145,11 @@ function PluginManager(taskManager: TaskManager, configWizard: IConfigWizard): P
   async function use(...plugins: PluginsArray): Promise<void> {
     // Parse plugins array and get installable plugins
     const installablePlugins = await parsePlugins(plugins);
+
     // Install each plugin
-    await Promise.all(
-      installablePlugins.map(
-        async (plugin: Plugin) => await install(plugin),
-      ),
-    );
+    for (const plugin of installablePlugins) {
+      await install(plugin);
+    }
   }
 
 

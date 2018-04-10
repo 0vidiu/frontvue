@@ -252,9 +252,9 @@ function ConfigWizard(
 
         // Merge configuration defaults with answers from questionnaire
         const newAnswers = { ...currentDefaults, ...answers };
+        const stringAnswers = JSON.stringify(newAnswers, null, 2);
 
-        logger.info(`Your '${questionnaire.namespace}' configuration:`);
-        console.log(JSON.stringify(newAnswers, null, 2));
+        logger.info(`Your '${questionnaire.namespace}' configuration: \n${stringAnswers}`);
         return await setConfiguration(questionnaire.namespace, newAnswers);
       }
 
@@ -275,7 +275,7 @@ function ConfigWizard(
       throw new Error(ERRORS.QUESTIONNARE_NAMESPACE_DOESNT_EXIST);
     }
 
-    logger.info(`Configure '${namespace}'`);
+    logger.info(`Configure '${namespace}':`);
     return await inquirer.prompt(questionnaires[namespace]);
   }
 
