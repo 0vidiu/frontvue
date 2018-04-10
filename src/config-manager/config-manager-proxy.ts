@@ -49,11 +49,13 @@ export default function ConfigManagerProxy(
       // Filter option keys and get all that begin with the prefix
       const filteredKeys = Object.keys(config).filter(item => item.match(RegExp(`^${prefix}`)));
       // Create new config object with the filtered key/value pairs
-      return filteredKeys.reduce((prefixedConfig, item) =>
-        ({
-          ...prefixedConfig,
-          ...{ [item]: config[item],
-        }}), {});
+      return prefixer.remove(
+        filteredKeys.reduce((prefixedConfig, item) =>
+          ({
+            ...prefixedConfig,
+            ...{ [item]: config[item],
+          }}), {}),
+      );
     }
 
     if (typeof key === 'string') {

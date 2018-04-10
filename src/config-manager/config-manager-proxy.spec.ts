@@ -129,9 +129,9 @@ describe('ConfigManagerProxy', () => {
       await configManager.set(`${pluginPrefix('myplugin')}option3`, 'value3');
 
       return expect(configProxy.get()).to.eventually.deep.equal({
-        'plugin-myplugin:option1': 'value1',
-        'plugin-myplugin:option2': 'value2',
-        'plugin-myplugin:option3': 'value3',
+        option1: 'value1',
+        option2: 'value2',
+        option3: 'value3',
       });
     });
 
