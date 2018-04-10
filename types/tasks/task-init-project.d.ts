@@ -9,7 +9,8 @@ declare const taskExport: {
 /**
  * Task main function
  * @param done Gulp async callback
+ * @param pluginProvider Assortment of tools for plugins and tasks (e.g. logger, config manager, etc.)
  */
-declare function taskFn(done: AnyFunction, {logger}: PluginProvider): Promise<any>;
+declare function taskFn(done: AnyFunction, {config, logger}: PluginProvider): Promise<any>;
 export { taskFn };
 export default taskExport;

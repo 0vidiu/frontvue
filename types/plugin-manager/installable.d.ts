@@ -1,4 +1,4 @@
-import { Config } from '../config-manager';
+import { Config, IConfigManager } from '../config-manager';
 import { ConfigQuestionnaire } from '../config-wizard';
 import { ILogger } from '../util/logger';
 import { AnyFunction } from '../util/utility-functions';
@@ -12,6 +12,7 @@ export interface InstallableObject {
     configQuestionnaire?: ConfigQuestionnaire;
 }
 export interface PluginProvider {
+    config: IConfigManager;
     logger: ILogger;
 }
 export declare const ERRORS: {
@@ -32,13 +33,13 @@ export declare function isInstallable(object: {
  * Create utilities provider
  * @param name Plugin name
  */
-export declare function getUtilitiesProvider(name: string): PluginProvider;
+export declare function getUtilitiesProvider(name: string): Promise<PluginProvider>;
 /**
  * Decorate task function and provide utilities (logger, config, etc.)
  * @param taskFn Plugin task function
  * @param name Plugin name
  */
-export declare function provideUtilities(taskFn: AnyFunction, name: string): AnyFunction;
+export declare function provideUtilities(taskFn: AnyFunction, name: string): Promise<AnyFunction>;
 /**
  * Installable plugin factory
  * @param { configDefaults } Configuration defaults object
