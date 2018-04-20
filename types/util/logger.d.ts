@@ -8,7 +8,7 @@ export interface ILogger {
     log: LoggerMethod;
     success: LoggerMethod;
     warn: LoggerMethod;
-    fancyDecoration?: () => string;
+    fancyDecoration?: (symbol?: string) => string;
     prefix?: (level: LogLevel, channel?: string) => string;
 }
 export declare enum LogLevel {

@@ -81,9 +81,17 @@ export declare function hasAllKeys(object?: ({
  */
 export declare function pluginPrefix(name: string): string;
 /**
- * Create plugin name
+ * Create plugin name (e.g. 'foo' -> 'frontvue-plugin-foo')
+ * @param name Plugin name
+ * @param prefix Prefix to be added
  */
 export declare function pluginName(name: string, prefix?: string): string;
+/**
+ * Extract prefix from string (e.g. 'foo:bar' -> 'foo')
+ * @param string String to extract prefix from
+ * @param separator Separator character
+ */
+export declare function getPrefix(string: string, separator?: string): string;
 export declare function dynamicRequire(module: string): any;
 /**
  * Flatten passed in array and return one dimensional array

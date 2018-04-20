@@ -3,6 +3,7 @@ import { ConfigQuestionnaire } from '../config-wizard';
 import { ILogger } from '../util/logger';
 import { AnyFunction } from '../util/utility-functions';
 import { Plugin } from './index';
+import { WorkingPaths } from './paths';
 export interface InstallableObject {
     taskFn: AnyFunction;
     hook: string;
@@ -13,7 +14,10 @@ export interface InstallableObject {
 }
 export interface PluginProvider {
     config: IConfigManager;
+    env: string | undefined;
+    gulp: any;
     logger: ILogger;
+    paths: WorkingPaths;
 }
 export declare const ERRORS: {
     FUNC_INVALID: string;
@@ -30,7 +34,7 @@ export declare function isInstallable(object: {
     [key: string]: any;
 }): boolean | void;
 /**
- * Create utilities provider
+ * Create utilities provider (e.g. logger, config proxy, paths, etc.)
  * @param name Plugin name
  */
 export declare function getUtilitiesProvider(name: string): Promise<PluginProvider>;
