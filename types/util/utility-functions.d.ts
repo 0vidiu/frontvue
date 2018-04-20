@@ -81,7 +81,7 @@ export declare function hasAllKeys(object?: ({
  */
 export declare function pluginPrefix(name: string): string;
 /**
- * Create plugin name (e.g. 'foo' -> 'frontvue-plugin-foo')
+ * Create plugin name (e.g. 'foo' -> '@frontvue/plugin-foo')
  * @param name Plugin name
  * @param prefix Prefix to be added
  */
