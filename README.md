@@ -4,6 +4,8 @@
 
 ## Front-End plugable build system
 
+[![asciicast](https://asciinema.org/a/7zQAsEdcbd5XmQgaGX8Xolh9q.png)](https://asciinema.org/a/7zQAsEdcbd5XmQgaGX8Xolh9q)
+
 ## Status:
 - Documentation needs improvement, especially in the plugin authoring section.
 - JavaScript related plugins are next to come.
@@ -11,8 +13,7 @@
 ## Quickstart
 ```bash
 # Go to your project's folder
-mkdir my-project
-cd my-project
+mkdir my-project && cd my-project
 
 # Set up your package.json and add frontvue
 yarn init
@@ -23,14 +24,14 @@ yarn add -D @frontvue/core
 # or
 npm i -D @frontvue/core
 
+# Install plugin(s)
+# e.g.
+yarn add -D @frontvue/plugin-stylus
+
 # Configure and copy boilerplate templates
 frontvue init
 # or
 fv i
-
-# Install plugins you chose at configuration
-# e.g.
-yarn add -D @frontvue/plugin-stylus
 
 # Start build system in development mode
 frontvue dev
@@ -52,6 +53,11 @@ fv r <hook>
 frontvue --help
 # or
 fv -h
+
+# You can combine shorthand commands:
+# e.g. fv i, fv init, frontvue i, frontvue init
+#      fv d, fv dev, frontvue d, frontvue dev
+#      etc.
 ```
 
 ---
