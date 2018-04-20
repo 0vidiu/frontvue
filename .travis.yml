@@ -14,10 +14,7 @@ script:
   - yarn validate
 after_success:
   - yarn report-coverage
-# There is no need to release this package to a registry
-# This should be uncommented once you're up and running
-# with your own module, configured with a CI service
-#  - yarn travis-deploy-once "yarn semantic-release"
+  - yarn travis-deploy-once "yarn semantic-release"
 branches:
   only:
     - master
