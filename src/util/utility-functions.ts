@@ -306,16 +306,16 @@ export function pluginPrefix(name: string): string {
 
 
 /**
- * Create plugin name (e.g. 'foo' -> 'frontvue-plugin-foo')
+ * Create plugin name (e.g. 'foo' -> '@frontvue/plugin-foo')
  * @param name Plugin name
  * @param prefix Prefix to be added
  */
-export function pluginName(name: string, prefix: string = 'frontvue'): string {
-  if (name.indexOf('frontvue-plugin') === 0) {
+export function pluginName(name: string, prefix: string = '@frontvue'): string {
+  if (name.indexOf(`${prefix}/plugin`) === 0) {
     return name;
   }
 
-  return `${prefix}-plugin-${name}`;
+  return `${prefix}/plugin-${name}`;
 }
 
 

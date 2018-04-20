@@ -398,17 +398,17 @@ describe('Utility Functions', () => {
 
   describe('pluginName()', () => {
     it('returns prefixed plugin name', () => {
-      expect(pluginName('myplugin')).to.equal('frontvue-plugin-myplugin');
+      expect(pluginName('myplugin')).to.equal('@frontvue/plugin-myplugin');
     });
 
 
     it('accepts custom prefix', () => {
-      expect(pluginName('myplugin', 'myprefix')).to.equal('myprefix-plugin-myplugin');
+      expect(pluginName('myplugin', '@myprefix')).to.equal('@myprefix/plugin-myplugin');
     });
 
 
     it('doesn\'t prefix already prefixed name', () => {
-      expect(pluginName('frontvue-plugin-myplugin')).to.equal('frontvue-plugin-myplugin');
+      expect(pluginName('@frontvue/plugin-myplugin')).to.equal('@frontvue/plugin-myplugin');
     });
   });
 
