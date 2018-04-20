@@ -2,7 +2,7 @@
  * Name: index.ts
  * Description: Main entry point file
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 import { IConfigManager } from './config-manager';
 import { PluginManager as IPluginManager } from './plugin-manager';
