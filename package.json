@@ -110,7 +110,7 @@
     "webpack-strip-block": "^0.2.0"
   },
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "config": {
     "ghooks": {
