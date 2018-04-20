@@ -5,9 +5,10 @@
  * @since 0.1.0
  */
 
-import ConfigManager from './config-manager';
+import ConfigManager, { IConfigManager } from './config-manager';
+import ConfigManagerProxy from './config-manager/config-manager-proxy';
 import ConfigWizard from './config-wizard';
-import PluginManager from './plugin-manager';
+import PluginManager, { PluginManager as IPluginManager } from './plugin-manager';
 import TaskManager from './task-manager';
 import taskInitProject from './tasks/task-init-project';
 import Logger, { ILogger } from './util/logger';
@@ -23,17 +24,23 @@ const taskManagerConfig = {
   ],
 };
 
-let plugins = [
+let internalPlugins = [
   taskInitProject,
-  'stylus',
 ];
 
 /* test:start */
-// Remove external plugins when testing
-plugins = [
-  taskInitProject,
-];
+// Stop internal plugin loading in TEST environment
+internalPlugins = [];
 /* test:end */
+
+
+/**
+ * Get list of plugins from init config and register them
+ */
+export async function loadConfigPlugins(configManager: IConfigManager, pluginManager: IPluginManager) {
+  const config = ConfigManagerProxy(configManager, 'init');
+  await pluginManager.use(...await config.get('plugins'));
+}
 
 
 /**
@@ -48,8 +55,16 @@ async function Frontvue() {
   const pluginManager = PluginManager(taskManager, configWizard);
   const { run } = taskManager;
 
-  // Use custom plugin(s)
-  await pluginManager.use(...plugins);
+  // Use internal plugin(s)
+  await pluginManager.use(...internalPlugins);
+
+  // Load external plugins from configuration
+  let loadExternalPlugins = loadConfigPlugins;
+  /* test:start */
+  // Stop external plugin loading in TEST environment by replacing the load function
+  loadExternalPlugins = async () => undefined;
+  /* test:end */
+  await loadExternalPlugins(configManager, pluginManager);
 
   // Return public API
   return Object.freeze({
