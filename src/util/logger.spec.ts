@@ -1,4 +1,5 @@
 import { assert, expect } from 'chai';
+import chalk from 'chalk';
 import 'mocha';
 import { stdout } from 'test-console';
 import LoggerFactory, { ERRORS, Logger, LogLevel } from './logger';
@@ -120,7 +121,31 @@ describe('Logger', () => {
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
     });
+
+
+    describe('private method fancyDecoration()', () => {
+      beforeEach(() => inspect.restore());
+
+
+      it('outputs three colored predefined symbols', () => {
+        expect(logger.fancyDecoration()).to.equal(
+          chalk.hex('#7AC0DA')('\u22C5') +
+          chalk.hex('#97B1DF')('\u22C5') +
+          chalk.hex('#EE82EE')('\u22C5'),
+        );
+      });
+
+
+      it('outputs three colored custom symbols', () => {
+        expect(logger.fancyDecoration('.')).to.equal(
+          chalk.hex('#7AC0DA')('.') +
+          chalk.hex('#97B1DF')('.') +
+          chalk.hex('#EE82EE')('.'),
+        );
+      });
+    });
   });
+
 
   describe('Factory', () => {
     it('has .getInstance() method', () => {

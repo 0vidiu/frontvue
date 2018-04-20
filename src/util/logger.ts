@@ -21,7 +21,7 @@ export interface ILogger {
   log: LoggerMethod;
   success: LoggerMethod;
   warn: LoggerMethod;
-  fancyDecoration?: () => string;
+  fancyDecoration?: (symbol?: string) => string;
   prefix?: (level: LogLevel, channel?: string) => string;
 }
 
@@ -78,7 +78,7 @@ export function Logger(namespace: string): (channel?: string) => ILogger {
       return undefined;
     }
     const channel = chalk.hex(LogColors.debug).bold(`@${this.channel}`);
-    console.log(`  ${fancyDecoration()}`, channel, ...args);
+    console.log(`${fancyDecoration()}`, channel, ...args);
   }
 
 
@@ -143,12 +143,12 @@ export function Logger(namespace: string): (channel?: string) => ILogger {
    * @param channel Optional logging channel
    */
   function prefix(level: LogLevel, channel: string = '') {
-    const cNamespace = chalk.hex('#7AC0DA').bold(`\u15D6 ${namespace}`);
+    const icon = chalk.hex('#EE82EE')('\u0192\u028B.');
+    const cNamespace = chalk.hex('#7AC0DA').bold(`${icon} ${namespace}`);
     const cLevel = chalk.bgHex(LogColors[LogLevel[level]])(` ${LogLevel[level].toUpperCase()} `);
     const cChannel = channel
       ? chalk.hex('#EE82EE').bold(`@${channel}:`)
       : '';
-
     return `${cNamespace} ${cLevel} ${cChannel}`;
   }
 
@@ -156,14 +156,19 @@ export function Logger(namespace: string): (channel?: string) => ILogger {
   /**
    * Generate fancy prefix arrows
    */
-  function fancyDecoration() {
+  function fancyDecoration(symbol: string = '\u22C5'): string {
     const colors = ['#7AC0DA', '#97B1DF', '#EE82EE'];
-    let arrows = '';
-    for (const color of colors) {
-      arrows += chalk.hex(color)('\u2042');
-    }
-    return arrows;
+
+    // Return a recursive IIFE that accumulates the symbol in each color from the array
+    return (function makeDecoration(output: string = ''): string {
+      const color = colors.shift();
+      if (typeof color === 'undefined') {
+        return output;
+      }
+      return makeDecoration(output + chalk.hex(color)(symbol));
+    }());
   }
+
 
   // Return public API
   return function (channel?: string): ILogger {
