@@ -56,7 +56,8 @@
     "commander": "^2.15.0",
     "detect-indent": "^5.0.0",
     "gulp": "^4.0.0",
-    "inquirer": "^5.2.0"
+    "inquirer": "^5.2.0",
+    "moment": "^2.22.1"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0-beta.40",
