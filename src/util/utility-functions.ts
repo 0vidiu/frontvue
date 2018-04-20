@@ -306,7 +306,9 @@ export function pluginPrefix(name: string): string {
 
 
 /**
- * Create plugin name
+ * Create plugin name (e.g. 'foo' -> 'frontvue-plugin-foo')
+ * @param name Plugin name
+ * @param prefix Prefix to be added
  */
 export function pluginName(name: string, prefix: string = 'frontvue'): string {
   if (name.indexOf('frontvue-plugin') === 0) {
@@ -314,6 +316,20 @@ export function pluginName(name: string, prefix: string = 'frontvue'): string {
   }
 
   return `${prefix}-plugin-${name}`;
+}
+
+
+/**
+ * Extract prefix from string (e.g. 'foo:bar' -> 'foo')
+ * @param string String to extract prefix from
+ * @param separator Separator character
+ */
+export function getPrefix(string: string, separator: string = ':'): string {
+  if (string.includes(separator)) {
+    return string.split(separator)[0];
+  }
+
+  return string;
 }
 
 

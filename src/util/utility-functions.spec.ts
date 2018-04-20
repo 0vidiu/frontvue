@@ -10,6 +10,7 @@ import {
   ERRORS,
   flattenArray,
   getFnName,
+  getPrefix,
   hasAllKeys,
   hasNested,
   limitFn,
@@ -506,6 +507,23 @@ describe('Utility Functions', () => {
       assert.throws(() => arrayOf([]), ERRORS.ARRAYOF_NEEDS_STRINGS);
       assert.throws(() => arrayOf([], 1), ERRORS.ARRAYOF_NEEDS_STRINGS);
       assert.throws(() => arrayOf([], false, true), ERRORS.ARRAYOF_NEEDS_STRINGS);
+    });
+  });
+
+
+  describe('getPrefix()', () => {
+    it('extracts prefix from prefixed string', () => {
+      expect(getPrefix('foo:bar')).to.equal('foo');
+    });
+
+
+    it('extracts prefix from prefixed string with custom separator', () => {
+      expect(getPrefix('foo|bar', '|')).to.equal('foo');
+    });
+
+
+    it('returns the original string if strings lacks separator', () => {
+      expect(getPrefix('foo')).to.equal('foo');
     });
   });
 });
