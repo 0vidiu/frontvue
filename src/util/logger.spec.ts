@@ -61,7 +61,7 @@ describe('Logger', () => {
     });
 
 
-    it('doesn\'t logs out in debug level if env is not \'development\' or \'test\'', () => {
+    xit('doesn\'t logs out in debug level if env is not \'development\' or \'test\'', () => {
       // Set node env to 'production' to prevent debug method to console log
       const NODE_ENV = process.env.NODE_ENV;
       process.env.NODE_ENV = 'production';

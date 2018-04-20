@@ -74,9 +74,10 @@ export function Logger(namespace: string): (channel?: string) => ILogger {
    * @param messages Arguments to log out
    */
   function debug(this: ILogger, ...args: any[]): void {
-    if (env && !debugEnv.includes(env)) {
-      return undefined;
-    }
+    // TODO: Add a new log level to replace this one
+    // if (env && !debugEnv.includes(env)) {
+    //   return undefined;
+    // }
     const channel = chalk.hex(LogColors.debug).bold(`@${this.channel}`);
     console.log(`${fancyDecoration()}`, channel, ...args);
   }
