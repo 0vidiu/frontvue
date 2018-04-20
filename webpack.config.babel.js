@@ -71,6 +71,7 @@ const configuration = {
     gulp: 'gulp',
     inquirer: 'inquirer',
     'detect-indent': 'detect-indent',
+    moment: 'moment',
   },
 
   optimization: {
