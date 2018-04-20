@@ -7,6 +7,7 @@
 
 import chalk from 'chalk';
 import * as gulp from 'gulp';
+import * as moment from 'moment';
 import ConfigManager, { Config, IConfigManager } from '../config-manager';
 import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
@@ -92,10 +93,25 @@ export async function provideUtilities(taskFn: AnyFunction, name: string): Promi
   const provider = await getUtilitiesProvider(name);
 
   return async function (cb) {
+    // Get start date
     const startTime = Date.now();
-    await taskFn(cb, provider);
-    const duration = (Date.now() - startTime) / 1000;
-    provider.logger.debug(chalk.bold(`took ${duration.toFixed(1)}s`));
+    // Run task function and catch any errors
+    // Provide plugin utilities and callback function
+    try {
+      await taskFn(cb, provider);
+    } catch (error) {
+      provider.logger.fatal(error.message);
+    }
+    // Get timestamp when task finishes
+    const endTime = Date.now();
+    // Get timestamp delta and convert to seconds
+    const duration = (endTime - startTime) / 1000;
+    // Style duration time console log output
+    const durationMessage = chalk.hex('#7AC0DA')(`${duration.toFixed(1)}s`);
+    // Format timestamp
+    const formatedTimestamp = chalk.gray(moment(endTime).format('H:mm:ss'));
+    // Finally, output the message
+    provider.logger.debug(`${formatedTimestamp} took ${durationMessage}`);
   };
 }
 
