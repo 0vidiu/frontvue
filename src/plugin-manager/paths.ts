@@ -30,7 +30,7 @@ function PathsProvider(coreConfig: Config = {}): WorkingPaths {
   for (const option of ['sourceDir', 'buildDir']) {
     if (Object.keys(coreConfig).includes(option)) {
       paths = { ...paths,
-        [option]: coreConfig[option],
+        [option]: path.join(cwd, coreConfig[option]),
       };
     }
   }
