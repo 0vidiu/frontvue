@@ -33,7 +33,7 @@ const questions = [
     type: 'input',
   },
   {
-    choices: ['stylus', 'vue', 'html'],
+    choices: ['stylus'],
     message: 'What plugins would you like to use?',
     name: 'plugins',
     type: 'checkbox',
