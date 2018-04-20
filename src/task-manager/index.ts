@@ -2,7 +2,7 @@
  * Name: task-manager.ts
  * Description: Allows task registration at different hook in life-cycle
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import * as gulp from 'gulp';

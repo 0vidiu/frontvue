@@ -2,7 +2,7 @@
  * Name: config-wizard.ts
  * Description: Configuration questionnaire wizard
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import * as inquirer from 'inquirer';

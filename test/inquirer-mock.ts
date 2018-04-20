@@ -3,7 +3,7 @@
  * Description: Stub for inquirer prompt testing
  * Author: https://github.com/simonepri
  * URL: https://github.com/SBoudrias/Inquirer.js/issues/379#issuecomment-368479630
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 /* eslint-disable no-await-in-loop, valid-jsdoc */

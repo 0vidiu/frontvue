@@ -2,14 +2,14 @@
  * Name: cli.ts
  * Description: Main entry point file for CLI tool
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import * as program from 'commander';
 import frontvue from '../core';
 
 // Set CLI tool version
-program.version('0.1.0', '-v, --version');
+program.version('1.0.0', '-v, --version');
 
 
 /**

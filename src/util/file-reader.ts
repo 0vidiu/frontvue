@@ -2,7 +2,7 @@
  * Name: file-reader.ts
  * Description: Fetch file contents and return parsed JSON
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import * as detectIndent from 'detect-indent';

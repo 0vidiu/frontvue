@@ -2,7 +2,7 @@
  * Name: task-init-project.ts
  * Description: Task for initializing a new project
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import * as gulp from 'gulp';

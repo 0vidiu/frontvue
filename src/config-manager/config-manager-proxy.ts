@@ -2,7 +2,7 @@
  * Name: plugin-proxy.ts
  * Description: Plugin Manager Proxy for plugins to restrict configuration access
  * Author: Ovidiu Barabula <lectii2008@gmail.com>
- * @since 0.1.0
+ * @since 1.0.0
  */
 
 import { arrayOf, pluginPrefix, required } from '../util/utility-functions';
