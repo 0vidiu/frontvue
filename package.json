@@ -51,6 +51,9 @@
     "stylus",
     "deploy"
   ],
+  "peerDependencies": {
+    "@frontvue/plugin-stylus": "^1.0.0"
+  },
   "dependencies": {
     "chalk": "^2.3.2",
     "commander": "^2.15.0",
