@@ -28,6 +28,10 @@ frontvue init
 # or
 fv i
 
+# Install plugins you chose at configuration
+# e.g.
+yarn add -D @frontvue/plugin-stylus
+
 # Start build system in development mode
 frontvue dev
 # or
