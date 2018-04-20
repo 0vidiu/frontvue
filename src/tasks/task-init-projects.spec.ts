@@ -20,15 +20,10 @@ describe('#Task: Init project', () => {
     };
   });
 
-  it('does what it is supposed to do', () => {
-    expect(taskFn(callback, pluginProvider)).to.not.throw;
-  });
 
-
-  it('calls the callback function', async () => {
+  it('returns a promise', async () => {
     let wasCalled = false;
     const customCallback = () => wasCalled = true;
-    await taskFn(customCallback, pluginProvider);
-    expect(wasCalled).to.have.been.true;
+    expect(taskFn(customCallback, pluginProvider)).to.satisfy(subject => subject instanceof Promise);
   });
 });

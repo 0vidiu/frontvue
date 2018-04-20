@@ -8,32 +8,45 @@
 import * as gulp from 'gulp';
 import frontvue from '../core';
 import { PluginProvider } from '../plugin-manager/installable';
-import { AnyFunction, sleep } from '../util/utility-functions';
+import { AnyFunction } from '../util/utility-functions';
 
 
 // Configuration defaults
 const configDefaults = {
-  fullName: 'John Smith',
-  useDefault: true,
+  buildDir: 'build',
+  plugins: [],
+  sourceDir: 'source',
 };
 
 // Configuration wizard questions
 const questions = [
   {
-    default: configDefaults.fullName,
-    message: 'Type in your full name',
-    name: 'fullName',
+    default: configDefaults.sourceDir,
+    message: 'Main source directory',
+    name: 'sourceDir',
     type: 'input',
+  },
+  {
+    default: configDefaults.buildDir,
+    message: 'Main build directory',
+    name: 'buildDir',
+    type: 'input',
+  },
+  {
+    choices: ['stylus', 'vue', 'html'],
+    message: 'What plugins would you like to use?',
+    name: 'plugins',
+    type: 'checkbox',
   },
 ];
 
 // Object to be exported
 const taskExport = {
-  // configDefaults,
-  // configQuestionnaire: {
-  //   namespace: 'init',
-  //   questions,
-  // },
+  configDefaults,
+  configQuestionnaire: {
+    namespace: 'init',
+    questions,
+  },
   description: 'Task for initializing a new project',
   hook: 'init',
   name: 'init',
@@ -47,14 +60,20 @@ const taskExport = {
  * @param pluginProvider Assortment of tools for plugins and tasks (e.g. logger, config manager, etc.)
  */
 async function taskFn(done: AnyFunction, { config, logger }: PluginProvider): Promise<any> {
-  console.log(JSON.stringify(await config.get(), null, 2));
-  // return gulp.series('template', 'clean', 'process', 'watch');
-  return done && done();
+  return new Promise(async resolve => {
+    const core = await frontvue;
+
+    for (const hook of ['config', 'template']) {
+      await core.run(hook);
+    }
+
+    resolve();
+  });
 }
 
 
 /* test:start */
-export { taskFn };
+export { taskFn, configDefaults };
 /* test:end */
 
 export default taskExport;
