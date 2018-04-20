@@ -66,6 +66,7 @@ const configuration = {
   },
 
   externals: {
+    '@frontvue/plugin-stylus': '@frontvue/plugin-stylus',
     chalk: 'chalk',
     commander: 'commander',
     gulp: 'gulp',
