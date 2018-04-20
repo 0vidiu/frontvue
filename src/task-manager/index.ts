@@ -54,16 +54,16 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
    * @param hook Name of the hook
    */
   function run(hook: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      const onError = (error?: Error) => reject(error || false);
-
-      if (hasTasks(hook)) {
-        gulp.parallel(tasks[hook])(onError);
-        return resolve(true);
-      }
-
+    // If not tasks in hook, return false
+    if (!hasTasks(hook)) {
       logger.warn(`<${hook}> hook doesn't exist or has no tasks`);
-      return resolve(false);
+      return Promise.resolve(false);
+    }
+
+    return new Promise((resolve, reject) => {
+      gulp.series(gulp.parallel(tasks[hook]), () => resolve(true))(
+        /* istanbul ignore next */ ignore => undefined,
+      );
     });
   }
 
