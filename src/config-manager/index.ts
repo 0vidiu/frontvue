@@ -72,7 +72,7 @@ async function ConfigManager(
    * @param error Caught error
    */
   function errorHandler(error?: Error): Error {
-    const errorMessage = error ? `\n  ${error.message}` : '';
+    const errorMessage = error ? `\n    ${error.message}` : '';
     logger.fatal(`${ERRORS.CONFIG_FETCH_FAILED} ${errorMessage}`);
     return new Error(ERRORS.CONFIG_FETCH_FAILED);
   }

@@ -106,7 +106,7 @@ async function PackageJsonConfigReader(
    * @param error Error object
    */
   function errorHandler(error?: Error): Error {
-    const errorMessage = error ? `\n  ${error.message}` : '';
+    const errorMessage = error ? `\n    ${error.message}` : '';
     logger.fatal(`${ERRORS.RW_ERROR} ${errorMessage}`);
     return new Error(ERRORS.RW_ERROR);
   }
