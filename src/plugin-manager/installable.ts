@@ -8,13 +8,15 @@
 import chalk from 'chalk';
 import * as gulp from 'gulp';
 import * as moment from 'moment';
+import * as path from 'path';
 import ConfigManager, { Config, IConfigManager } from '../config-manager';
 import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskSubscriber } from '../task-manager';
 import Logger, { ILogger } from '../util/logger';
-import { AnyFunction } from '../util/utility-functions';
+import { AnyFunction, getPrefix } from '../util/utility-functions';
 import { Plugin } from './index';
+import PathsProvider, { WorkingPaths } from './paths';
 
 
 export interface InstallableObject {
@@ -28,7 +30,10 @@ export interface InstallableObject {
 
 export interface PluginProvider {
   config: IConfigManager;
+  env: string | undefined;
+  gulp: any;
   logger: ILogger;
+  paths: WorkingPaths;
 }
 
 
@@ -68,18 +73,38 @@ export function isInstallable(object: {[key: string]: any}): boolean | void {
 
 
 /**
- * Create utilities provider
+ * Create utilities provider (e.g. logger, config proxy, paths, etc.)
  * @param name Plugin name
  */
 export async function getUtilitiesProvider(name: string): Promise<PluginProvider> {
-  const logger: ILogger = Logger.getInstance()(name);
   // TODO: Find a better way of getting the same instance of ConfigManager from Frontvue()
   // TODO: Will have to make ConfigManager a Singleton
-  const config: IConfigManager = ConfigManagerProxy(await ConfigManager(), name);
+  const configManager: IConfigManager = await ConfigManager();
+  // Create logger instance with plugin's name as the channel
+  const logger: ILogger = Logger.getInstance()(name);
 
+  // Instantiate a config manager proxy with access to the plugin's configuration
+  const config: IConfigManager = ConfigManagerProxy(configManager, getPrefix(name));
+
+  // Get core configuration
+  const coreConfigProxy: IConfigManager = ConfigManagerProxy(configManager, 'init');
+
+  // Get paths object
+  const paths = PathsProvider(await coreConfigProxy.get());
+
+  // Return an object with plugin utilities
   return Object.freeze({
+    // Plugin Config Manager Proxy
     config,
+    // Process environment: "production", "development", "test", etc.
+    env: process.env.NODE_ENV,
+    // Passing on current gulp instance
+    // for plugins to have access to already registered tasks
+    gulp,
+    // Logger instance with predefined channel
     logger,
+    // Paths object for source and build directories
+    paths,
   });
 }
 

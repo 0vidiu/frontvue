@@ -152,13 +152,14 @@ describe('Installable', () => {
       subject = await getUtilitiesProvider('name');
     });
 
+
     it('returns an object', () => {
       expect(subject).to.be.an('object');
     });
 
 
     it('has logger member', () => {
-      expect(subject).to.contain.keys('logger', 'config');
+      expect(subject).to.contain.keys('config', 'env', 'gulp', 'logger', 'paths');
     });
   });
 
@@ -166,11 +167,15 @@ describe('Installable', () => {
   describe('provideUtilities()', () => {
     let wasCalled: boolean;
     let wrappedFn: AnyFunction;
+    let wrappedErrorFn: AnyFunction;
 
     beforeEach(async () => {
       wasCalled = false;
       wrappedFn = await provideUtilities(function (done, provider) {
         wasCalled = true;
+      }, 'wrappedFn');
+      wrappedErrorFn = await provideUtilities(function (done, provider) {
+        throw new Error('Some nasty error message');
       }, 'wrappedFn');
     });
 
@@ -183,6 +188,11 @@ describe('Installable', () => {
     it('calls wrapped function when called', () => {
       wrappedFn();
       expect(wasCalled).to.be.true;
+    });
+
+
+    it('catches wrapped function errors when called', () => {
+      expect(() => wrappedErrorFn()).to.not.throw();
     });
 
 
