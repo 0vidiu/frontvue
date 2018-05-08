@@ -134,7 +134,19 @@ const mainMinifiedConfiguration = {...mainConfiguration,
   optimization: {
     minimize: true,
   },
-});
+};
+
+// Make minified CLI file executable
+mainMinifiedConfiguration.plugins = [...mainMinifiedConfiguration.plugins,
+  new webpackPermissionsPlugin({
+    buildFiles: [
+      {
+        path: path.resolve(dist, `${packageJson.name}.cli.min.js`),
+        fileMode: '755',
+      },
+    ],
+  }),
+];
 
 
 /**
