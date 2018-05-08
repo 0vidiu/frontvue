@@ -12,7 +12,14 @@ import { Stream } from 'stream';
 import { Config } from '../config-manager';
 import FileReader from './file-reader';
 import Logger, { ILogger } from './logger';
-import { required, sortObjectKeys } from './utility-functions';
+import {
+  isObject,
+  isObjectEmpty,
+  limitFn,
+  pluginName,
+  required,
+  sortObjectKeys,
+} from './utility-functions';
 
 
 export type PackageManager = 'yarn' | 'npm';
@@ -39,6 +46,8 @@ export interface DependenciesInstallerDefaults {
   managers: PackageManagersList;
 }
 
+export type DependenciesSubscriber = (manifest: DependenciesManifest, name: string) => void;
+
 export interface DependenciesInstaller {
   add(manifest: DependenciesManifest): Promise<void>;
   run(): Promise<void>;
@@ -46,6 +55,7 @@ export interface DependenciesInstaller {
   checkForManagers?(): Promise<void>;
   hasNoManagers?(): boolean;
   isManagerInstalled?(manager: PackageManager): Promise<boolean>;
+  isManifestValid?(manifest: DependenciesManifest): boolean;
   logError?(stream: Stream): void;
   logOutput?(stream: Stream): void;
   /* test:end */
@@ -57,7 +67,9 @@ const MESSAGES = {
   INSTALLING: 'Installing dependencies using',
   LOOKING_FOR_MANAGERS: 'Looking for package managers\u2026',
   MANAGER_FOUND: 'Package manager found',
+  MANIFEST_SCHEMA: 'When registering your plugin dependencies use the "package.json" schema',
   MANUAL_VERSION_CHANGE_REQUIRED: 'Unexpected behaviour or errors might occur. Please change the version of the package manually!',
+  REGISTERING_PLUGIN_DEPS: 'Registering dependencies',
 };
 
 // Custom error messages
@@ -66,6 +78,7 @@ export const ERRORS = {
   DEPENDENCY_ALREADY_ADDED: 'Package already exists',
   DEPENDENCY_VERSION_MISMATCH: 'Package already exists with different version',
   MANAGERS_REQUIRED: 'You need at least one package manager on your system (e.g. \'yarn\', \'npm\')',
+  MANIFEST_INVALID: 'Dependencies <manifest> object is invalid',
   NO_MANAGERS: 'Wow, no package managers were found on your system',
 };
 
@@ -80,7 +93,7 @@ export async function Installer(
   options?: DependenciesInstallerOptions,
 ): Promise<DependenciesInstaller> {
   const defaultOptions: DependenciesInstallerDefaults = {
-    logChannel: 'PackageInstaller',
+    logChannel: 'DepsInstaller',
     managers: ['yarn', 'npm'],
   };
 
@@ -112,10 +125,95 @@ export async function Installer(
 
 
   /**
+   * Check validity of <manifest> object
+   * @param manifest Dependencies manifest object
+   */
+  function isManifestValid(manifest: DependenciesManifest) {
+    if (!isObject(manifest)) {
+      logger.error(`${ERRORS.MANIFEST_INVALID}: not an object`);
+      return false;
+    }
+
+    if (isObjectEmpty(manifest)) {
+      logger.error(`${ERRORS.MANIFEST_INVALID}: object is empty`);
+      return false;
+    }
+
+    // Not valid if both "devDependencies" and "dependencies" keys are missing
+    if (!Object.keys(manifest).some(key => ['dependencies', 'devDependencies'].includes(key))) {
+      logger.error(`${ERRORS.MANIFEST_INVALID}: object should have at least one of the following keys: 'dependencies', 'devDependencies'`);
+      return false;
+    }
+
+    // If "dependencies" or "devDependencies" are not objects
+    if (
+      (typeof manifest.dependencies !== 'undefined' && !isObject(manifest.dependencies)) ||
+      (typeof manifest.devDependencies !== 'undefined' && !isObject(manifest.devDependencies))
+    ) {
+      logger.error(`${ERRORS.MANIFEST_INVALID}: manifest's 'dependencies' and 'devDependencies' should be objects`);
+      return false;
+    }
+
+    // If manifest contains "devDependencies" or "dependencies" keys, but are empty
+    if (
+      // Has "devDependencies", but is empty
+      (
+        typeof manifest.dependencies === 'undefined' &&
+        (
+          typeof manifest.devDependencies !== 'undefined' &&
+          isObject(manifest.devDependencies) &&
+          isObjectEmpty(manifest.devDependencies)
+        )
+      ) ||
+      // Has "dependencies", but is empty
+      (
+        typeof manifest.devDependencies === 'undefined' &&
+        (
+          typeof manifest.dependencies !== 'undefined' &&
+          isObject(manifest.dependencies) &&
+          isObjectEmpty(manifest.dependencies)
+        )
+      ) ||
+      // Has both "dependencies" and "devDependencies" empty
+      (
+        typeof manifest.dependencies !== 'undefined' &&
+        isObject(manifest.dependencies) &&
+        isObjectEmpty(manifest.dependencies) &&
+        typeof manifest.devDependencies !== 'undefined' &&
+        isObject(manifest.devDependencies) &&
+        isObjectEmpty(manifest.devDependencies)
+      )
+    ) {
+      logger.error(
+        `${ERRORS.MANIFEST_INVALID}: manifest's 'dependencies' or 'devDependencies' objects should not be empty`,
+    );
+      return false;
+    }
+
+    return true;
+  }
+
+
+  /**
    * Add dependencies to package.json
    * @param dependencies Object with "dependencies" and "devDependencies"
    */
   async function add(manifest: DependenciesManifest): Promise<void> {
+    // Validate manifest parameter
+    if (!isManifestValid(manifest)) {
+      const schema = {
+        dependencies: {
+          package: '^1.0.1',
+          package2: '^2.2.0',
+        },
+        devDependencies: {
+          'dev-package': '~3.1.4',
+        },
+      };
+      logger.warn(`${MESSAGES.MANIFEST_SCHEMA}:\n${JSON.stringify(schema, null, 2)}`);
+      return undefined;
+    }
+
     try {
       // Get current dependencies
       const projectConfig = await fileReader.read();
@@ -306,6 +404,7 @@ export async function Installer(
     checkForManagers,
     hasNoManagers,
     isManagerInstalled,
+    isManifestValid,
     logError,
     logOutput,
   };

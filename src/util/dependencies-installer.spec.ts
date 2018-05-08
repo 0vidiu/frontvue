@@ -110,6 +110,14 @@ describe('DependenciesInstaller', () => {
       const { devDependencies } = await fileReader.read();
       expect(devDependencies['my-dev-package-1']).to.equal('^1.0.0');
     });
+
+
+    it('doesn\'t do anything if <manifest> is not valid', async () => {
+      await installer.add({});
+      const { devDependencies } = await fileReader.read();
+      expect(devDependencies['my-dev-package-1']).to.equal('^1.0.0');
+    });
+  });
   });
 
 
@@ -153,6 +161,75 @@ describe('DependenciesInstaller', () => {
 
     it('returns false if unknown package manager is not installed', async () => {
       expect(await installer.isManagerInstalled('non-existent-manager')).to.be.false;
+    });
+  });
+
+
+  describe('private method isManifestValid()', () => {
+    beforeEach(async () => {
+      installer = await InstallerSingleton.getInstance(process.cwd());
+    });
+
+
+    it('returns true if <manifest> has dependencies object', () => {
+      expect(installer.isManifestValid({ dependencies: { 'my-package': '1.0.0' } })).to.be.true;
+      expect(installer.isManifestValid({
+        dependencies: { 'my-package': '1.0.0' },
+        devDependencies: {},
+      })).to.be.true;
+    });
+
+
+    it('returns true if <manifest> has devDependencies object', () => {
+      expect(installer.isManifestValid({
+        dependencies: {},
+        devDependencies: { 'my-package': '1.0.0' },
+      })).to.be.true;
+    });
+
+
+    it('returns false if <manifest> argument is not an object', () => {
+      expect(installer.isManifestValid(1)).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument is empty', () => {
+      expect(installer.isManifestValid({})).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument is missing both dependencies and devDependencies keys', () => {
+      expect(installer.isManifestValid({ 'some-key': 'value' })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has non-object dependencies', () => {
+      expect(installer.isManifestValid({ dependencies: 1 })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has non-object devDependencies', () => {
+      expect(installer.isManifestValid({ devDependencies: 1 })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has non-object dependencies and devDependencies', () => {
+      expect(installer.isManifestValid({ dependencies: 1, devDependencies: 1 })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has dependencies but is empty', () => {
+      expect(installer.isManifestValid({ dependencies: {} })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has devDependencies but is empty', () => {
+      expect(installer.isManifestValid({ devDependencies: {} })).to.be.false;
+    });
+
+
+    it('returns false if <manifest> argument has both dependencies and devDependencies empty', () => {
+      expect(installer.isManifestValid({ dependencies: {}, devDependencies: {} })).to.be.false;
     });
   });
 
