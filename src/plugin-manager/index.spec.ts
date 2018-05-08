@@ -3,11 +3,13 @@ import 'mocha';
 import ConfigManager from '../config-manager';
 import ConfigWizard from '../config-wizard';
 import TaskManager from '../task-manager';
+import DependenciesInstaller from '../util/dependencies-installer';
 import PluginManager, { ERRORS } from './index';
 
 describe('PluginManager', () => {
   let taskManager;
   let configWizard;
+  let depsInstaller;
   let validPlugin;
 
   beforeEach(async () => {
@@ -15,6 +17,7 @@ describe('PluginManager', () => {
       hooks: ['before', 'midway', 'after'],
     });
     configWizard = ConfigWizard(await ConfigManager());
+    depsInstaller = await DependenciesInstaller.getInstance(process.cwd());
     validPlugin = {
       install: () => true,
       name: 'my-valid-plugin',
@@ -23,7 +26,7 @@ describe('PluginManager', () => {
 
 
   it('instantiates', () => {
-    const pluginManager = PluginManager(taskManager, configWizard);
+    const pluginManager = PluginManager(taskManager, configWizard, depsInstaller);
     expect(pluginManager).to.be.an('object').to.contain.keys('use');
   });
 
@@ -42,11 +45,18 @@ describe('PluginManager', () => {
   });
 
 
+  it('throws if not passed DependenciesInstaller instance', () => {
+    assert.throws(() => PluginManager(taskManager, configWizard), ERRORS.NO_DEPS_INSTALLER);
+    assert.throws(() => PluginManager(taskManager, configWizard, {}), ERRORS.NO_DEPS_INSTALLER);
+    assert.throws(() => PluginManager(taskManager, configWizard, 1), ERRORS.NO_DEPS_INSTALLER);
+  });
+
+
   describe('private method loadPlugin()', () => {
     let pluginManager;
 
     beforeEach(() => {
-      pluginManager = PluginManager(taskManager, configWizard);
+      pluginManager = PluginManager(taskManager, configWizard, depsInstaller);
     });
 
 
@@ -71,7 +81,7 @@ describe('PluginManager', () => {
     let pluginManager;
 
     beforeEach(() => {
-      pluginManager = PluginManager(taskManager, configWizard);
+      pluginManager = PluginManager(taskManager, configWizard, depsInstaller);
     });
 
 
@@ -120,7 +130,7 @@ describe('PluginManager', () => {
       getSubscribers: () => called = true,
       run: () => undefined,
     };
-    const pluginManager = PluginManager(taskManagerStub, configWizard);
+    const pluginManager = PluginManager(taskManagerStub, configWizard, depsInstaller);
     await pluginManager.use(validPlugin);
     expect(called).to.be.true;
   });
@@ -135,7 +145,20 @@ describe('PluginManager', () => {
       start: () => undefined,
     };
 
-    const pluginManager = PluginManager(taskManager, configWizardStub);
+    const pluginManager = PluginManager(taskManager, configWizardStub, depsInstaller);
+    await pluginManager.use(validPlugin);
+    expect(called).to.be.true;
+  });
+
+
+  it('calls depsInstaller.getSubscriber() method if plugin is valid', async () => {
+    let called = false;
+
+    const depsInstallerStub = {
+      getSubscriber: () => called = true,
+    };
+
+    const pluginManager = PluginManager(taskManager, configWizard, depsInstallerStub);
     await pluginManager.use(validPlugin);
     expect(called).to.be.true;
   });
@@ -153,7 +176,7 @@ describe('PluginManager', () => {
       },
     };
 
-    const pluginManager = PluginManager(taskManager, configWizard);
+    const pluginManager = PluginManager(taskManager, configWizard, depsInstaller);
     await pluginManager.use(pluginStub);
   });
 });
