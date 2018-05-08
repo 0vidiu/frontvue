@@ -18,6 +18,7 @@ const taskManagerConfig = {
     'init',
     'config',
     'template',
+    'dependencies',
     'clean',
     'process',
     'watch',
