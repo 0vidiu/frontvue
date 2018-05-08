@@ -9,7 +9,14 @@ import * as inquirer from 'inquirer';
 import { Config, IConfigManager } from '../config-manager';
 import ConfigPrefixer from '../config-manager/prefixer';
 import Logger, { ILogger } from '../util/logger';
-import { AnyFunction, hasAllKeys, limitFn, pluginPrefix, required } from '../util/utility-functions';
+import {
+  AnyFunction,
+  hasAllKeys,
+  isObjectEmpty,
+  limitFn,
+  pluginPrefix,
+  required,
+} from '../util/utility-functions';
 
 
 export interface ConfigQuestion {
@@ -88,7 +95,7 @@ function ConfigWizard(
    * Check if there are any questionnaiers
    */
   function anyQuestionnaiers(): boolean {
-    return Object.keys(questionnaires).length > 0;
+    return !isObjectEmpty(questionnaires);
   }
 
 

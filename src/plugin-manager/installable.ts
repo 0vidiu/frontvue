@@ -14,7 +14,7 @@ import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
 import { TaskSubscriber } from '../task-manager';
 import Logger, { ILogger } from '../util/logger';
-import { AnyFunction, getPrefix } from '../util/utility-functions';
+import { AnyFunction, AnyObject, getPrefix, isObject } from '../util/utility-functions';
 import { Plugin } from './index';
 import PathsProvider, { WorkingPaths } from './paths';
 
@@ -51,8 +51,8 @@ export const ERRORS = {
  * Check if object is an installable Plugin
  * @param object Plugin object to be tested
  */
-export function isInstallable(object: {[key: string]: any}): boolean | void {
-  if (typeof object !== 'object') {
+export function isInstallable(object: AnyObject): boolean | void {
+  if (!isObject(object)) {
     throw new Error(ERRORS.NOT_AN_OBJECT);
   }
 

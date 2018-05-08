@@ -6,6 +6,7 @@
  */
 
 import Logger, { ILogger } from '../util/logger';
+import { isObject, isObjectEmpty } from '../util/utility-functions';
 import PackageJsonConfigReader, {
   ConfigReader,
   ConfigReaderConstructor,
@@ -133,8 +134,8 @@ async function ConfigManager(
     if (typeof option === 'string' && typeof value !== 'undefined') {
       config[option] = value;
     // If we're passing in an object of key/value pairs
-    } else if (typeof option === 'object' && Object.keys(option).length > 0) {
-      config = { ...config, ...option };
+    } else if (isObject(option as object) && !isObjectEmpty(option as object)) {
+      config = { ...config, ...option as object };
     } else {
       return false;
     }
