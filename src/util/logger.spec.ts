@@ -2,6 +2,10 @@ import { assert, expect } from 'chai';
 import chalk from 'chalk';
 import 'mocha';
 import { stdout } from 'test-console';
+import {
+  StringIncludesAll as CheckForAll,
+  StringIncludesSome as CheckForSome,
+} from '../../test/utilities';
 import LoggerFactory, { ERRORS, Logger, LogLevel } from './logger';
 
 describe('Logger', () => {
@@ -41,9 +45,6 @@ describe('Logger', () => {
     const logger = Logger('namespace')('channel');
     let inspect: any;
 
-    const CheckForAll = bits => string => bits.every(bit => string.includes(bit));
-    const CheckForSome = bits => string => bits.some(bit => string.includes(bit));
-
     beforeEach(() => {
       inspect = stdout.inspect();
     });
@@ -54,7 +55,7 @@ describe('Logger', () => {
 
 
     it('logs out in debug level', () => {
-      const containsAll = CheckForAll(['channel', 'debug message']);
+      const containsAll = CheckForAll('channel', 'debug message');
       logger.debug('debug message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -76,7 +77,7 @@ describe('Logger', () => {
 
 
     it('logs out in error level', () => {
-      const containsAll = CheckForAll(['namespace', 'ERROR', 'error message']);
+      const containsAll = CheckForAll('namespace', 'ERROR', 'error message');
       logger.error('error message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -84,7 +85,7 @@ describe('Logger', () => {
 
 
     it('logs out in fatal level', () => {
-      const containsAll = CheckForAll(['namespace', 'FATAL', 'fatal message']);
+      const containsAll = CheckForAll('namespace', 'FATAL', 'fatal message');
       logger.fatal('fatal message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -92,7 +93,7 @@ describe('Logger', () => {
 
 
     it('logs out in info level', () => {
-      const containsAll = CheckForAll(['namespace', 'INFO', 'info message']);
+      const containsAll = CheckForAll('namespace', 'INFO', 'info message');
       logger.info('info message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -100,7 +101,7 @@ describe('Logger', () => {
 
 
     it('logs out in log level', () => {
-      const containsAll = CheckForAll(['channel', 'log message']);
+      const containsAll = CheckForAll('channel', 'log message');
       logger.log('log message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -108,7 +109,7 @@ describe('Logger', () => {
 
 
     it('logs out in success level', () => {
-      const containsAll = CheckForAll(['namespace', 'SUCCESS', 'success message']);
+      const containsAll = CheckForAll('namespace', 'SUCCESS', 'success message');
       logger.success('success message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
@@ -116,7 +117,7 @@ describe('Logger', () => {
 
 
     it('logs out in warn level', () => {
-      const containsAll = CheckForAll(['namespace', 'WARN', 'warn message']);
+      const containsAll = CheckForAll('namespace', 'WARN', 'warn message');
       logger.warn('warn message');
       expect(inspect.output.join(' ')).to.satisfy(containsAll);
       inspect.restore();
