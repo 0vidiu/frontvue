@@ -1,3 +1,6 @@
+export interface AnyObject {
+    [key: string]: any;
+}
 export interface NestedObject {
     [key: string]: any;
 }
@@ -104,3 +107,8 @@ export declare function flattenArray(array: any[]): any[];
  * @param array Array to be tested
  */
 export declare function arrayOf(array: any[], ...types: string[]): boolean;
+/**
+ * Alphabetically sort object keys
+ * @param object Object to be sorted
+ */
+export declare function sortObjectKeys(object: AnyObject): AnyObject;
