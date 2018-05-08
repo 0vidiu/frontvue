@@ -99,7 +99,7 @@ if (isDevelopment) {
  * CommonJS configuration
 */
 
-const mainConfiguration = Object.assign({}, configuration, {
+const mainConfiguration = {...configuration,
   output: {
     path: dist,
     filename: `${packageJson.name}.[name].js`,
@@ -107,10 +107,10 @@ const mainConfiguration = Object.assign({}, configuration, {
     libraryTarget: 'commonjs2',
     libraryExport: 'default',
   },
-});
+};
 
-// Make CLI file executable
-mainConfiguration.plugins.push(
+// Make unminified CLI file executable
+mainConfiguration.plugins = [...mainConfiguration.plugins,
   new webpackPermissionsPlugin({
     buildFiles: [
       {
@@ -118,10 +118,11 @@ mainConfiguration.plugins.push(
         fileMode: '755',
       },
     ],
-  })
-);
+  }),
+];
 
-const mainMinifiedConfiguration = Object.assign({}, mainConfiguration, {
+// Minified file output configuration
+const mainMinifiedConfiguration = {...mainConfiguration,
   output: {
     path: dist,
     filename: `${packageJson.name}.[name].min.js`,
