@@ -2,7 +2,7 @@
   "name": "@frontvue/core",
   "version": "0.0.0-development",
   "description": "Front-End build system using Gulp, Stylus, Vue and TypeScript",
-  "main": "dist/@frontvue/core.core.js",
+  "main": "dist/@frontvue/core.core.min.js",
   "types": "types/core.d.ts",
   "author": "Ovidiu Barabula <lectii2008@gmail.com> (https://github.com/0vidiu)",
   "license": "MIT",
