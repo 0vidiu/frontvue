@@ -54,9 +54,15 @@ function TaskManager(options?: TaskManagerOptions): TaskManager {
    * @param hook Name of the hook
    */
   function run(hook: string): Promise<boolean> {
+    // Check if hook is registered
+    if (!hooks.includes(hook)) {
+      logger.warn(`Sorry, the hook <${hook}> doesn't exist`);
+      return Promise.resolve(false);
+    }
+
     // If not tasks in hook, return false
     if (!hasTasks(hook)) {
-      logger.warn(`<${hook}> hook doesn't exist or has no tasks`);
+      logger.warn(`Sorry, the hook <${hook}> has no registered tasks`);
       return Promise.resolve(false);
     }
 

@@ -94,6 +94,12 @@ describe('TaskManager', () => {
   });
 
 
+  it('returns false when hook doesn\'t exist', async () => {
+    const taskManager = TaskManager(options);
+    expect(await taskManager.run('non-existent')).to.be.false;
+  });
+
+
   it('returns true if specific hook has tasks', () => {
     const taskManager = TaskManager(options);
     makeTask('before').install(taskManager.getSubscribers());
