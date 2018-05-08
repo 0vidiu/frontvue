@@ -10,6 +10,7 @@ import { stdout } from 'test-console';
 import { StringIncludesAll } from '../../test/utilities';
 import InstallerSingleton, {
   DependenciesInstaller,
+  DependenciesSubscriber,
   ERRORS,
   Installer,
 } from './dependencies-installer';
@@ -118,6 +119,46 @@ describe('DependenciesInstaller', () => {
       expect(devDependencies['my-dev-package-1']).to.equal('^1.0.0');
     });
   });
+
+
+  describe('getSubscriber()', () => {
+    let subscriber: DependenciesSubscriber;
+
+    beforeEach(() => {
+      subscriber = installer.getSubscriber();
+    });
+
+    it('returns a function', () => {
+      expect(subscriber).to.be.a('function');
+    });
+
+
+    it('returns a limited function', () => {
+      subscriber();
+      expect(subscriber()).to.be.an('undefined');
+    });
+
+
+    it('returns a function which returns a promise', () => {
+      expect(subscriber()).to.be.a('promise');
+    });
+
+
+    it('returns a function that accepts two parameters', () => {
+      expect(subscriber({}, 'awesome-plugin')).to.be.a('promise');
+    });
+
+
+    it('returns a function that calls .add() method', async () => {
+      fileReader = FileReader(path.join(process.cwd(), 'test.package.json'));
+      await subscriber(
+        {
+          dependencies: { 'my-package': '^0.1.0' },
+        },
+      );
+      const { dependencies } = await fileReader.read();
+      expect(dependencies).to.contains.keys('my-package');
+    });
   });
 
 

@@ -50,6 +50,7 @@ export type DependenciesSubscriber = (manifest: DependenciesManifest, name: stri
 
 export interface DependenciesInstaller {
   add(manifest: DependenciesManifest): Promise<void>;
+  getSubscriber(): DependenciesSubscriber;
   run(): Promise<void>;
   /* test:start */
   checkForManagers?(): Promise<void>;
@@ -360,6 +361,20 @@ export async function Installer(
 
 
   /**
+   * Get dependencies subscriber function
+   */
+  function getSubscriber(): DependenciesSubscriber {
+    // Return a limited function (1 maximum call) to register plugin dependencies
+    return limitFn(async function (manifest: DependenciesManifest, name?: string) {
+      if (typeof name !== 'undefined') {
+        logger.debug(`${MESSAGES.REGISTERING_PLUGIN_DEPS} for ${chalk.cyan.bold(pluginName(name))}`);
+      }
+      await add(manifest);
+    });
+  }
+
+
+  /**
    * Log stderr handler
    * @param stream Standard Error stream
    */
@@ -395,6 +410,7 @@ export async function Installer(
   // Public API object
   let publicApi: DependenciesInstaller = {
     add,
+    getSubscriber,
     run,
   };
 
