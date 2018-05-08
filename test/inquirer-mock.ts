@@ -105,7 +105,7 @@ function inquirerHandler(inputs) {
       answers[prompt.name] = await promptHandler(
         prompt,
         answers,
-        inputs[prompt.name]
+        inputs[prompt.name],
       );
     }
     return answers;
