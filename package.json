@@ -52,6 +52,7 @@
     "deploy"
   ],
   "peerDependencies": {
+    "@frontvue/plugin-pug": "^1.0.0",
     "@frontvue/plugin-stylus": "^1.0.0"
   },
   "dependencies": {
