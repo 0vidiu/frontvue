@@ -13,6 +13,8 @@ import {
   getPrefix,
   hasAllKeys,
   hasNested,
+  isObject,
+  isObjectEmpty,
   limitFn,
   pluginName,
   pluginPrefix,
@@ -545,6 +547,70 @@ describe('Utility Functions', () => {
     it('returns empty object, if empty object is passed in', () => {
       expect(sortObjectKeys({}))
         .to.deep.equal({});
+    });
+  });
+
+
+  describe('isObject()', () => {
+    it('returns true if it receives an object', () => {
+      expect(isObject({})).to.be.true;
+    });
+
+
+    it('returns false if argument is a number', () => {
+      expect(isObject(1)).to.be.false;
+    });
+
+
+    it('returns false if argument is a string', () => {
+      expect(isObject('string')).to.be.false;
+    });
+
+
+    it('returns false if argument is a boolean', () => {
+      expect(isObject(true)).to.be.false;
+    });
+
+
+    it('returns false if argument is an array', () => {
+      expect(isObject([1, 2, 3])).to.be.false;
+    });
+
+
+    it('returns false if argument is a function', () => {
+      expect(isObject(() => true)).to.be.false;
+    });
+
+
+    it('returns false if argument is undefined', () => {
+      expect(isObject()).to.be.false;
+    });
+
+
+    it('returns false if argument is null', () => {
+      expect(isObject(null)).to.be.false;
+    });
+
+
+    it('returns false if argument is a symbol', () => {
+      expect(isObject(Symbol('my-symbol'))).to.be.false;
+    });
+  });
+
+
+  describe('isObjectEmpty()', () => {
+    it('returns true if object is empty', () => {
+      expect(isObjectEmpty({})).to.be.true;
+    });
+
+
+    it('returns false if object has keys', () => {
+      expect(isObjectEmpty({ a: 1, b: 2, c: 3 })).to.be.false;
+    });
+
+
+    it('throws if argument is not an object', () => {
+      assert.throws(() => isObjectEmpty('not-an-object'), ERRORS.ISOBJECTEMPTY_NEEDS_OBJECT);
     });
   });
 });

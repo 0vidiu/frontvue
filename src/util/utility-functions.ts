@@ -48,6 +48,9 @@ export const ERRORS = {
   // arrayOf()
   ARRAYOF_NEEDS_ARRAY: 'arrayOf() requires first argument <array> to be an \'array\'',
   ARRAYOF_NEEDS_STRINGS: 'arrayOf() requires rest argument(s) <types> to be of type \'string\', e.g. \'number\', \'string\', \'boolean\', \'array\', \'object\'',
+
+  // isObjectEmpty()
+  ISOBJECTEMPTY_NEEDS_OBJECT: 'isObjectEmpty() requires first argument <object> to be an \'object\'',
 };
 
 
@@ -412,4 +415,27 @@ export function sortObjectKeys(object: AnyObject): AnyObject {
       ...sortedObject,
       [key]: object[key],
     }), {});
+}
+
+
+/**
+ * Check if passed in parameter is an object
+ * @param object Object to be tested
+ */
+export function isObject(object: AnyObject): boolean {
+  return typeof object === 'object' && !Array.isArray(object) && object !== null;
+}
+
+
+/**
+ * Check if object is empty (no enumerable keys)
+ * @param object Object to be tested
+ */
+export function isObjectEmpty(object: AnyObject): boolean {
+  // Check if passed parameter is an object
+  if (!isObject(object)) {
+    throw new Error(ERRORS.ISOBJECTEMPTY_NEEDS_OBJECT);
+  }
+
+  return Object.keys(object).length === 0;
 }
