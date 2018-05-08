@@ -7,6 +7,10 @@
 
 import Logger, { ILogger } from './logger';
 
+
+export interface AnyObject {
+  [key: string]: any;
+}
 export interface NestedObject {
   [key: string]: any;
 }
@@ -395,4 +399,17 @@ export function arrayOf(array: any[], ...types: string[]): boolean {
 
     return types.includes(typeof item);
   });
+}
+
+
+/**
+ * Alphabetically sort object keys
+ * @param object Object to be sorted
+ */
+export function sortObjectKeys(object: AnyObject): AnyObject {
+  return Object.keys(object).sort()
+    .reduce((sortedObject, key) => ({
+      ...sortedObject,
+      [key]: object[key],
+    }), {});
 }

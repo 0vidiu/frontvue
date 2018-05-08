@@ -20,6 +20,7 @@ import {
   required,
   retry,
   sleep,
+  sortObjectKeys,
 } from './utility-functions';
 
 describe('Utility Functions', () => {
@@ -524,6 +525,26 @@ describe('Utility Functions', () => {
 
     it('returns the original string if strings lacks separator', () => {
       expect(getPrefix('foo')).to.equal('foo');
+    });
+  });
+
+
+  describe('sortObjectKeys()', () => {
+    it('returns the sorted object', () => {
+      expect(Object.keys(sortObjectKeys({ c: 3, b: 2, a: 1 })))
+        .to.deep.equal(Object.keys({ a: 1, b: 2, c: 3 }));
+    });
+
+
+    it('returns sorted object if already sorted', () => {
+      expect(Object.keys(sortObjectKeys({ a: 1, b: 2, c: 3 })))
+        .to.deep.equal(Object.keys({ a: 1, b: 2, c: 3 }));
+    });
+
+
+    it('returns empty object, if empty object is passed in', () => {
+      expect(sortObjectKeys({}))
+        .to.deep.equal({});
     });
   });
 });
