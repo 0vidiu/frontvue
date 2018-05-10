@@ -7,8 +7,8 @@
 
 import * as path from 'path';
 import { IConfigWizard, QuestionnaireSubscriber } from '../config-wizard';
+import { DependenciesManager, DependenciesSubscriber } from '../dependencies-manager';
 import { TaskManager, TaskSubscriber } from '../task-manager';
-import dependenciesInstaller, { DependenciesInstaller, DependenciesSubscriber } from '../util/dependencies-installer';
 import Logger, { ILogger } from '../util/logger';
 import { dynamicRequire, flattenArray, pluginName } from '../util/utility-functions';
 import Installable, { InstallableObject } from './installable';
@@ -34,7 +34,7 @@ export type PluginSubscribers = TaskSubscriber | QuestionnaireSubscriber | Depen
 // Custom error messages
 export const ERRORS = {
   NO_CONFIG_WIZARD: 'PluginManager() requires second argument to be a ConfigWizard instance',
-  NO_DEPS_INSTALLER: 'PluginManager() requires third argument to be a DependenciesInstaller instance',
+  NO_DEPS_MANAGER: 'PluginManager() requires third argument to be a DependenciesManager instance',
   NO_TASK_MANAGER: 'PluginManager() requires first argument to be a TaskManager instance',
   PLUGIN_NAME_SHOULD_BE_STRING: 'PluginManager() passed in plugin name should be a string',
   PLUGIN_NOT_FOUND: 'PluginManager> plugin could not be loaded',
@@ -47,7 +47,7 @@ export const ERRORS = {
 function PluginManager(
   taskManager: TaskManager,
   configWizard: IConfigWizard,
-  depsInstaller: DependenciesInstaller,
+  depsManager: DependenciesManager,
 ): PluginManager {
   const logger: ILogger = Logger.getInstance()('PluginManager');
 
@@ -56,7 +56,7 @@ function PluginManager(
     typeof taskManager !== 'object' ||
     !taskManager.hasOwnProperty('getSubscribers')
   ) {
-    throw new Error(ERRORS.NO_TASK_MANAGER);
+    throw new Error(`${ERRORS.NO_TASK_MANAGER}, ${typeof taskManager} was passed instead`);
   }
 
   if (
@@ -64,15 +64,15 @@ function PluginManager(
     typeof configWizard !== 'object' ||
     !configWizard.hasOwnProperty('getSubscriber')
   ) {
-    throw new Error(ERRORS.NO_CONFIG_WIZARD);
+    throw new Error(`${ERRORS.NO_CONFIG_WIZARD}, ${typeof configWizard} was passed instead`);
   }
 
   if (
-    typeof depsInstaller === 'undefined' ||
-    typeof depsInstaller !== 'object' ||
-    !depsInstaller.hasOwnProperty('getSubscriber')
+    typeof depsManager === 'undefined' ||
+    typeof depsManager !== 'object' ||
+    !depsManager.hasOwnProperty('getSubscriber')
   ) {
-    throw new Error(ERRORS.NO_DEPS_INSTALLER);
+    throw new Error(`${ERRORS.NO_DEPS_MANAGER}, ${typeof depsManager} was passed instead`);
   }
 
 
@@ -136,8 +136,8 @@ function PluginManager(
       taskManager.getSubscribers(),
       // Subscriber for configuration questionnaire registration
       configWizard.getSubscriber(),
-      // Dependencies installer subscribrer
-      depsInstaller.getSubscriber(),
+      // Dependencies manager subscribrer
+      depsManager.getSubscriber(),
     ];
   }
 
