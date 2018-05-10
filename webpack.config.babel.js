@@ -34,17 +34,6 @@ const configuration = {
       {
         test: /\.tsx?$/,
         enforce: 'pre',
-        use: {
-          loader: 'tslint-loader',
-          options: {
-            configFile: 'tslint.json',
-          },
-        },
-        include,
-      },
-
-      {
-        test: /\.tsx?$/,
         use: [
           {
             loader: 'webpack-strip-block',
@@ -53,6 +42,19 @@ const configuration = {
               end: 'test:end',
             },
           },
+          {
+            loader: 'tslint-loader',
+            options: {
+              configFile: 'tslint.json',
+            },
+          },
+        ],
+        include,
+      },
+
+      {
+        test: /\.tsx?$/,
+        use: [
           {
             loader: 'awesome-typescript-loader',
             options: {
