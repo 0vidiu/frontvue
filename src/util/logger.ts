@@ -144,11 +144,11 @@ export function Logger(namespace: string): (channel?: string) => ILogger {
    * @param channel Optional logging channel
    */
   function prefix(level: LogLevel, channel: string = '') {
-    const icon = chalk.hex('#EE82EE')('\u0192\u028B.');
-    const cNamespace = chalk.hex('#7AC0DA').bold(`${icon} ${namespace}`);
-    const cLevel = chalk.bgHex(LogColors[LogLevel[level]])(` ${LogLevel[level].toUpperCase()} `);
+    const logLevelColor = LogColors[LogLevel[level]];
+    const cNamespace = chalk.hex('#7AC0DA').bold(`${namespace}`);
+    const cLevel = chalk.bold.hex(logLevelColor)(`\u2ACD ${LogLevel[level].toUpperCase()}\u2ACE `);
     const cChannel = channel
-      ? chalk.hex('#EE82EE').bold(`@${channel}:`)
+      ? chalk.hex('#EE82EE').bold(`@${channel}`)
       : '';
     return `${cNamespace} ${cLevel} ${cChannel}`;
   }
@@ -219,7 +219,7 @@ function LoggerFactory() {
     /**
      * Create new or retrieve existing Logger instance
      */
-    getInstance(namespace: string = 'frontvue') {
+    getInstance(namespace: string = '\u0192\u028B.') {
       if (typeof instance === 'undefined') {
         instance = createInstance(namespace);
       }
