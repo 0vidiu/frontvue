@@ -22,6 +22,7 @@ export declare const ERRORS: {
     HAS_ALL_KEYS_NEEDS_OBJECT: string;
     ARRAYOF_NEEDS_ARRAY: string;
     ARRAYOF_NEEDS_STRINGS: string;
+    ISOBJECTEMPTY_NEEDS_OBJECT: string;
 };
 /**
  * Check object for path
@@ -112,3 +113,13 @@ export declare function arrayOf(array: any[], ...types: string[]): boolean;
  * @param object Object to be sorted
  */
 export declare function sortObjectKeys(object: AnyObject): AnyObject;
+/**
+ * Check if passed in parameter is an object
+ * @param object Object to be tested
+ */
+export declare function isObject(object: AnyObject): boolean;
+/**
+ * Check if object is empty (no enumerable keys)
+ * @param object Object to be tested
+ */
+export declare function isObjectEmpty(object: AnyObject): boolean;

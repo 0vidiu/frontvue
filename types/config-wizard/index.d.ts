@@ -17,12 +17,6 @@ export interface QuestionnaireAnswers {
 }
 export declare type QuestionnaireSubscriber = (defaults: Config, questionnaire: ConfigQuestionnaire) => Promise<boolean | Error>;
 export interface IConfigWizard {
-    getQuestionnaires?(): Questionnaires;
-    startQuestionnaire?(namespace: string): Promise<Config>;
-    validateQuestionnaire?(questionnaire: ConfigQuestionnaire): boolean;
-    isConfigured?(pluginName: string, defaults: Config): Promise<boolean>;
-    getConfiguration?(namespace: string, defaults: Config): Promise<Config>;
-    setConfiguration?(namespace: string, config: Config): Promise<boolean | Error>;
     addQuestionnaire(...items: ConfigQuestionnaire[]): boolean;
     getSubscriber(): QuestionnaireSubscriber;
     start(): Config;

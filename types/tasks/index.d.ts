@@ -1,6 +1,11 @@
+/**
+ * Name: index.ts
+ * Description: Import all tasks and export as single tasks array
+ * Author: Ovidiu Barabula <lectii2008@gmail.com>
+ * @since 1.1.0
+ */
 import { PluginProvider } from '../plugin-manager/installable';
-import { AnyFunction } from '../util/utility-functions';
-declare const taskExport: {
+declare const tasks: ({
     configDefaults: {
         buildDir: string;
         plugins: never[];
@@ -25,6 +30,11 @@ declare const taskExport: {
     description: string;
     hook: string;
     name: string;
-    taskFn: (done: AnyFunction, { config, logger }: PluginProvider) => Promise<any>;
-};
-export default taskExport;
+    taskFn: (done: (...args: any[]) => any, { config, logger }: PluginProvider) => Promise<any>;
+} | {
+    description: string;
+    hook: string;
+    name: string;
+    taskFn: (done: (...args: any[]) => any, { config, logger }: PluginProvider) => Promise<void>;
+})[];
+export default tasks;

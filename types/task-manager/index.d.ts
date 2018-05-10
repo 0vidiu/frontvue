@@ -7,10 +7,6 @@ export interface TaskSubscriber {
 export interface TaskManager {
     run(hook: string): Promise<boolean>;
     getSubscribers(): TaskSubscriber;
-    subscribe?(task: string, hook: string): boolean;
-    hasTasks?(hook: string): boolean;
-    getTasks?(): Tasks;
-    getHooks?(): string[];
 }
 export interface TaskManagerOptions {
     [key: string]: any;
