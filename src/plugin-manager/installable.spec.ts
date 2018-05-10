@@ -84,6 +84,35 @@ describe('Installable', () => {
     });
 
 
+    it('calls dependencies installer subscriber when dependencies are passed', async () => {
+      const installable = {
+        dependencies: {
+          dependencies: {
+            myDependencyPackage: '^1.0.0',
+          },
+          devDependencies: {
+            myDevDependencyPackage: '^1.0.0',
+          },
+        },
+        hook,
+        name,
+        taskFn,
+      };
+      let called = false;
+      const configuredPlugin = Installable(installable);
+      const configSubscriberStub = async () => Promise.resolve(true);
+      const taskSubscribersStub = { hook: taskName => taskName };
+      const depsInstallerSubscriberStub = () => called = true;
+
+      await configuredPlugin.install(
+        taskSubscribersStub,
+        configSubscriberStub,
+        depsInstallerSubscriberStub,
+      );
+      expect(called).to.be.true;
+    });
+
+
     it('doesn\'t call configuration subscriber when questionnaire is not available passed', async () => {
       const installable = {
         hook,

@@ -12,6 +12,8 @@ import * as path from 'path';
 import ConfigManager, { Config, IConfigManager } from '../config-manager';
 import ConfigManagerProxy from '../config-manager/config-manager-proxy';
 import { ConfigQuestionnaire, QuestionnaireSubscriber } from '../config-wizard';
+import { DependenciesSubscriber } from '../dependencies-manager';
+import { DependenciesManifest } from '../dependencies-manager/dependencies-installer';
 import { TaskSubscriber } from '../task-manager';
 import Logger, { ILogger } from '../util/logger';
 import { AnyFunction, AnyObject, getPrefix, isObject } from '../util/utility-functions';
@@ -23,6 +25,7 @@ export interface InstallableObject {
   taskFn: AnyFunction;
   hook: string;
   name: string;
+  dependencies?: DependenciesManifest;
   description?: string;
   configDefaults?: Config;
   configQuestionnaire?: ConfigQuestionnaire;
@@ -81,7 +84,7 @@ export async function getUtilitiesProvider(name: string): Promise<PluginProvider
   // TODO: Will have to make ConfigManager a Singleton
   const configManager: IConfigManager = await ConfigManager();
   // Create logger instance with plugin's name as the channel
-  const logger: ILogger = Logger.getInstance()(name);
+  const logger: ILogger = Logger.getInstance()(`task ${chalk.hex('#7AC0DA')(name)}`);
 
   // Instantiate a config manager proxy with access to the plugin's configuration
   const config: IConfigManager = ConfigManagerProxy(configManager, getPrefix(name));
@@ -145,6 +148,7 @@ export async function provideUtilities(taskFn: AnyFunction, name: string): Promi
  * Installable plugin factory
  * @param configDefaults Configuration defaults object
  * @param configQuestionnaire Configuration questionnaire object
+ * @param dependencies Dependencies manifest object
  * @param description Task description
  * @param hook Task registration hook
  * @param name Task name
@@ -162,6 +166,7 @@ function Installable(plugin: Plugin | InstallableObject): Plugin {
   const {
     configDefaults,
     configQuestionnaire,
+    dependencies,
     description,
     hook,
     name,
@@ -186,10 +191,12 @@ function Installable(plugin: Plugin | InstallableObject): Plugin {
    * Task plugin installer function
    * @param taskSubscribers Hook subscribers object
    * @param configSubscriber Configuration questionnaire subscriber
+   * @param dependenciesSubscriber Dependencies installer subscriber
    */
   async function install(
     taskSubscribers: TaskSubscriber,
     configSubscriber: QuestionnaireSubscriber,
+    dependenciesSubscriber: DependenciesSubscriber,
   ): Promise<void> {
     // Register Gulp task
     gulp.task(name, await provideUtilities(taskFn, name));
@@ -202,6 +209,11 @@ function Installable(plugin: Plugin | InstallableObject): Plugin {
       typeof configQuestionnaire !== 'undefined'
     ) {
       await configSubscriber(configDefaults, configQuestionnaire);
+    }
+
+    // Register plugin dependencies, if available
+    if (typeof dependencies !== 'undefined') {
+      await dependenciesSubscriber(dependencies, name);
     }
   }
 
