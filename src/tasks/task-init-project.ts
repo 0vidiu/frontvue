@@ -66,7 +66,7 @@ async function taskFn(done: AnyFunction, { config, logger }: PluginProvider): Pr
   return new Promise(async resolve => {
     const core = await frontvue;
 
-    for (const hook of ['config', 'template']) {
+    for (const hook of ['config', 'template', 'dependencies']) {
       await core.run(hook);
     }
 
