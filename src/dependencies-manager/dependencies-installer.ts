@@ -10,8 +10,8 @@ import { spawn } from 'child_process';
 import * as path from 'path';
 import { Stream } from 'stream';
 import { Config } from '../config-manager';
-import FileReader from './file-reader';
-import Logger, { ILogger } from './logger';
+import FileReader from '../util/file-reader';
+import Logger, { ILogger } from '../util/logger';
 import {
   isObject,
   isObjectEmpty,
@@ -19,7 +19,7 @@ import {
   pluginName,
   required,
   sortObjectKeys,
-} from './utility-functions';
+} from '../util/utility-functions';
 
 
 export type PackageManager = 'yarn' | 'npm';
@@ -46,11 +46,8 @@ export interface DependenciesInstallerDefaults {
   managers: PackageManagersList;
 }
 
-export type DependenciesSubscriber = (manifest: DependenciesManifest, name: string) => void;
-
 export interface DependenciesInstaller {
   add(manifest: DependenciesManifest): Promise<void>;
-  getSubscriber(): DependenciesSubscriber;
   run(): Promise<void>;
   /* test:start */
   checkForManagers?(): Promise<void>;
@@ -67,10 +64,9 @@ export interface DependenciesInstaller {
 const MESSAGES = {
   INSTALLING: 'Installing dependencies using',
   LOOKING_FOR_MANAGERS: 'Looking for package managers\u2026',
-  MANAGER_FOUND: 'Package manager found',
+  MANAGER_FOUND: 'Package manager(s) found',
   MANIFEST_SCHEMA: 'When registering your plugin dependencies use the "package.json" schema',
   MANUAL_VERSION_CHANGE_REQUIRED: 'Unexpected behaviour or errors might occur. Please change the version of the package manually!',
-  REGISTERING_PLUGIN_DEPS: 'Registering dependencies',
 };
 
 // Custom error messages
@@ -100,7 +96,7 @@ export async function Installer(
 
   // If options were passed, override defaults with the custom values
   let newOptions: DependenciesInstallerDefaults;
-  if (typeof options !== 'undefined') {
+  if (typeof options !== 'undefined' && isObject(options)) {
     newOptions = { ...defaultOptions, ...options };
   } else {
     newOptions = defaultOptions;
@@ -280,7 +276,7 @@ export async function Installer(
 
     // Get first available package manager
     const manager = availableManagers[0];
-    logger.info(`${MESSAGES.INSTALLING} ${chalk.cyan.bold(manager)}`);
+    logger.debug(`${MESSAGES.INSTALLING} ${chalk.cyan.bold(manager)}`);
 
     // Return a promise that will resolve when install process exits
     return new Promise((resolve, reject) => {
@@ -312,7 +308,6 @@ export async function Installer(
     // Check the availability of the package managers
     for (const manager of managers) {
       if (await isManagerInstalled(manager)) {
-        logger.debug(MESSAGES.MANAGER_FOUND, chalk.cyan.bold(manager));
         availableManagers = [...availableManagers, manager];
       }
     }
@@ -326,6 +321,8 @@ export async function Installer(
       // Throw custom error message with list of search package managers
       throw new Error(`${ERRORS.NO_MANAGERS} (${managersList})`);
     }
+
+    logger.debug(`${MESSAGES.MANAGER_FOUND}:`, chalk.cyan.bold(availableManagers.join(', ')));
   }
 
 
@@ -356,20 +353,6 @@ export async function Installer(
             resolve(false);
           }
         });
-    });
-  }
-
-
-  /**
-   * Get dependencies subscriber function
-   */
-  function getSubscriber(): DependenciesSubscriber {
-    // Return a limited function (1 maximum call) to register plugin dependencies
-    return limitFn(async function (manifest: DependenciesManifest, name?: string) {
-      if (typeof name !== 'undefined') {
-        logger.debug(`${MESSAGES.REGISTERING_PLUGIN_DEPS} for ${chalk.cyan.bold(pluginName(name))}`);
-      }
-      await add(manifest);
     });
   }
 
@@ -410,7 +393,6 @@ export async function Installer(
   // Public API object
   let publicApi: DependenciesInstaller = {
     add,
-    getSubscriber,
     run,
   };
 
@@ -440,7 +422,10 @@ function InstallerFactory() {
   /**
    * Create instance
    */
-  async function createInstance(cwd: string): Promise<DependenciesInstaller> {
+  async function createInstance(
+    cwd: string,
+    options?: DependenciesInstallerOptions,
+  ): Promise<DependenciesInstaller> {
     return await Installer(cwd);
   }
 
@@ -448,9 +433,12 @@ function InstallerFactory() {
   /**
    * Create new or retrieve existing instance
    */
-  async function getInstance(cwd: string) {
+  async function getInstance(
+    cwd: string,
+    options?: DependenciesInstallerOptions,
+  ): Promise<DependenciesInstaller> {
     if (typeof instance === 'undefined') {
-      instance = await createInstance(cwd);
+      instance = await createInstance(cwd, options);
     }
     return instance;
   }
