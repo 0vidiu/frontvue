@@ -36,6 +36,7 @@ const questions = [
     choices: [
       'stylus',
       'pug',
+      'js',
     ],
     message: 'What plugins would you like to use?',
     name: 'plugins',

@@ -70,6 +70,7 @@ const configuration = {
   externals: {
     '@frontvue/plugin-stylus': '@frontvue/plugin-stylus',
     '@frontvue/plugin-pug': '@frontvue/plugin-pug',
+    '@frontvue/plugin-js': '@frontvue/plugin-js',
     chalk: 'chalk',
     commander: 'commander',
     gulp: 'gulp',
